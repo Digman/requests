@@ -16,11 +16,29 @@ type Client struct {
 	WindowSize [2]int
 }
 
+var clientProfiles = map[string]map[string]tls_client.ClientProfile{
+	"Chrome": {
+		"default":    tls_client.DefaultClientProfile,
+		"Chrome/103": tls_client.Chrome_103,
+		"Chrome/104": tls_client.Chrome_104,
+		"Chrome/105": tls_client.Chrome_105,
+		"Chrome/106": tls_client.Chrome_106,
+		"Chrome/107": tls_client.Chrome_107,
+	},
+	"iPhone OS": {
+		"default":        tls_client.Safari_IOS_15_5,
+		"iPhone OS 15_5": tls_client.Safari_IOS_15_5,
+		"iPhone OS 15_6": tls_client.Safari_IOS_15_6,
+		"iPhone OS 16_0": tls_client.Safari_IOS_16_0,
+	},
+}
+
 func NewClient(userAgent string, windowSize [2]int) *Client {
 	cookieJar := NewCookieJar()
+	clientProfile := getClientProfile(userAgent)
 	options := []tls_client.HttpClientOption{
 		tls_client.WithTimeout(30),
-		tls_client.WithClientProfile(tls_client.Chrome_107),
+		tls_client.WithClientProfile(clientProfile),
 		tls_client.WithNotFollowRedirects(),
 		tls_client.WithInsecureSkipVerify(),
 		tls_client.WithCookieJar(cookieJar),
@@ -78,6 +96,24 @@ func (c *Client) GetRequestInfo() (bool, string) {
 	}
 
 	return true, b
+}
+
+func getClientProfile(userAgent string) tls_client.ClientProfile {
+	profile := tls_client.DefaultClientProfile
+	for ua, kv := range clientProfiles {
+		if strings.Contains(userAgent, ua) {
+			profile = kv["default"]
+			for s, clientProfile := range kv {
+				if s != "default" && strings.Contains(userAgent, s) {
+					profile = clientProfile
+					break
+				}
+			}
+			break
+		}
+	}
+
+	return profile
 }
 
 func isUrl(path string) bool {
