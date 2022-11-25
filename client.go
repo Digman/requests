@@ -8,7 +8,8 @@ import (
 )
 
 type Client struct {
-	TlsClient  tls_client.HttpClient
+	tlsClient tls_client.HttpClient
+
 	ProxyUrl   *url.URL
 	RawProxy   string
 	UserAgent  string
@@ -27,14 +28,14 @@ func NewClient(userAgent string, windowSize [2]int) *Client {
 	}
 	tlsClient, _ := tls_client.NewHttpClient(tls_client.NewNoopLogger(), options...)
 	return &Client{
-		TlsClient:  tlsClient,
+		tlsClient:  tlsClient,
 		UserAgent:  userAgent,
 		WindowSize: windowSize,
 	}
 }
 
 func (c *Client) NewRequest() *Request {
-	cReq := NewRequest(c.TlsClient)
+	cReq := NewRequest(c.tlsClient)
 	cReq.SetHeader("Accept", "*/*")
 	cReq.SetHeader("Accept-Encoding", "gzip,deflate,br")
 	cReq.SetHeader("Cache-Control", "no-store,no-cache")
@@ -58,16 +59,20 @@ func (c *Client) SetProxy(proxyUrl string) error {
 		}
 
 	}
-	return c.TlsClient.SetProxy(proxyUrl)
+	return c.tlsClient.SetProxy(proxyUrl)
+}
+
+func (c *Client) SetAutoRedirect(b bool) {
+	c.tlsClient.SetFollowRedirect(b)
 }
 
 func (c *Client) SetCookies(domain string, cookies []*http.Cookie) {
 	u := &url.URL{Host: domain, Scheme: "https", Path: "/"}
-	c.TlsClient.SetCookies(u, cookies)
+	c.tlsClient.SetCookies(u, cookies)
 }
 
-func (c *Client) CheckProxyInfo() (bool, string) {
-	_, b, e := c.NewRequest().SetUrl("http://httpbin.org/get").Send().End()
+func (c *Client) GetRequestInfo() (bool, string) {
+	_, b, e := c.NewRequest().SetUrl("https://tls.peet.ws/api/all").Send().End()
 	if e != nil {
 		return false, e.Error()
 	}
