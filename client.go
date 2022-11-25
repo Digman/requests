@@ -2,6 +2,7 @@ package requests
 
 import (
 	http "github.com/bogdanfinn/fhttp"
+	"github.com/bogdanfinn/fhttp/cookiejar"
 	tls_client "github.com/bogdanfinn/tls-client"
 	"net/url"
 	"strings"
@@ -37,7 +38,7 @@ var clientProfiles = map[string]map[string]tls_client.ClientProfile{
 }
 
 func NewClient(userAgent string, windowSize [2]int) *Client {
-	cookieJar := NewCookieJar()
+	cookieJar, _ := cookiejar.New(nil)
 	clientProfile := getClientProfile(userAgent)
 	options := []tls_client.HttpClientOption{
 		tls_client.WithTimeout(30),
