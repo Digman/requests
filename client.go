@@ -31,6 +31,9 @@ var clientProfiles = map[string]map[string]tls_client.ClientProfile{
 		"iPhone OS 15_6": tls_client.Safari_IOS_15_6,
 		"iPhone OS 16_0": tls_client.Safari_IOS_16_0,
 	},
+	"iPad": {
+		"default": tls_client.Safari_Ipad_15_6,
+	},
 }
 
 func NewClient(userAgent string, windowSize [2]int) *Client {
