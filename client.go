@@ -59,11 +59,12 @@ func NewClient(userAgent string, windowSize [2]int) *Client {
 func (c *Client) NewRequest() *Request {
 	cReq := NewRequest(c.tlsClient)
 	cReq.SetHeader("Accept", "*/*")
+	cReq.SetHeader("Accept-Language", "en-US,en;q=0.9")
 	cReq.SetHeader("Accept-Encoding", "gzip,deflate,br")
-	cReq.SetHeader("Cache-Control", "no-store,no-cache")
+	cReq.SetHeader("Cache-Control", "max-age=0")
 	cReq.SetHeader("Pragma", "no-cache")
 	cReq.SetHeader("User-Agent", c.UserAgent)
-	cReq.SetHeaderOrder([]string{"Accept", "Accept-Encoding", "Cache-Control", "Origin", "Pragma", "Referer", "User-Agent"})
+	cReq.SetHeaderOrder([]string{"Accept", "Accept-Encoding", "Cache-Control", "Pragma", "Referer", "User-Agent"})
 	return cReq
 }
 
@@ -94,7 +95,7 @@ func (c *Client) SetCookies(domain string, cookies []*http.Cookie) {
 }
 
 func (c *Client) GetRequestInfo() (bool, string) {
-	_, b, e := c.NewRequest().SetUrl("https://tls.peet.ws/api/all").Send().End()
+	_, b, e := c.NewRequest().SetUrl("https://client.tlsfingerprint.io:8443/").Send().End()
 	if e != nil {
 		return false, e.Error()
 	}
