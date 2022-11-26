@@ -44,6 +44,7 @@ var defaultHeaderOrder = []string{
 	"Cache-Control",
 	"Content-Length",
 	"Content-Type",
+	"Cookie",
 	"Origin",
 	"Pragma",
 	"Referer",
