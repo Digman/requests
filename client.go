@@ -8,7 +8,8 @@ import (
 )
 
 type Client struct {
-	tlsClient tls_client.HttpClient
+	tlsClient   tls_client.HttpClient
+	headerOrder []string
 
 	ProxyUrl   *url.URL
 	RawProxy   string
@@ -36,6 +37,20 @@ var clientProfiles = map[string]map[string]tls_client.ClientProfile{
 	},
 }
 
+var defaultHeaderOrder = []string{
+	"Accept",
+	"Accept-Encoding",
+	"Accept-Language",
+	"Cache-Control",
+	"Content-Length",
+	"Content-Type",
+	"Origin",
+	"Pragma",
+	"Referer",
+	"User-Agent",
+	"x-requested-with",
+}
+
 func NewClient(userAgent string, windowSize [2]int) *Client {
 	clientProfile := getClientProfile(userAgent)
 	options := []tls_client.HttpClientOption{
@@ -48,9 +63,10 @@ func NewClient(userAgent string, windowSize [2]int) *Client {
 	}
 	tlsClient, _ := tls_client.NewHttpClient(tls_client.NewNoopLogger(), options...)
 	return &Client{
-		tlsClient:  tlsClient,
-		UserAgent:  userAgent,
-		WindowSize: windowSize,
+		tlsClient:   tlsClient,
+		headerOrder: defaultHeaderOrder,
+		UserAgent:   userAgent,
+		WindowSize:  windowSize,
 	}
 }
 
@@ -62,8 +78,12 @@ func (c *Client) NewRequest() *Request {
 	cReq.SetHeader("Cache-Control", "max-age=0")
 	cReq.SetHeader("Pragma", "no-cache")
 	cReq.SetHeader("User-Agent", c.UserAgent)
-	cReq.SetHeaderOrder([]string{"Accept", "Accept-Encoding", "Cache-Control", "Pragma", "Referer", "User-Agent"})
+	cReq.SetHeaderOrder(c.headerOrder)
 	return cReq
+}
+
+func (c *Client) SetHeaderOrder(order []string) {
+	c.headerOrder = order
 }
 
 func (c *Client) SetProxy(proxyUrl string) error {
