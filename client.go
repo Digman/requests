@@ -67,8 +67,13 @@ func NewClient(userAgent string) *Client {
 		tlsClient:   tlsClient,
 		HeaderOrder: defaultHeaderOrder,
 		UserAgent:   userAgent,
-		WindowSize:  [2]int{1280, 1080},
+		WindowSize:  [2]int{1440, 900},
 	}
+}
+
+func DefaultClient() *Client {
+	userAgent := "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36"
+	return NewClient(userAgent)
 }
 
 func (c *Client) NewRequest() *Request {
