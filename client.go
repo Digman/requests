@@ -26,7 +26,7 @@ var clientProfiles = map[string]map[string]tls_client.ClientProfile{
 		"Chrome/106": tls_client.Chrome_106,
 		"Chrome/107": tls_client.Chrome_107,
 	},
-	"iPhone OS": {
+	"iPhone": {
 		"default":        tls_client.Safari_IOS_15_5,
 		"iPhone OS 15_5": tls_client.Safari_IOS_15_5,
 		"iPhone OS 15_6": tls_client.Safari_IOS_15_6,
