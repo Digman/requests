@@ -67,6 +67,7 @@ func NewClient(userAgent string) *Client {
 		tlsClient:   tlsClient,
 		HeaderOrder: defaultHeaderOrder,
 		UserAgent:   userAgent,
+		WindowSize:  [2]int{1280, 1080},
 	}
 }
 
