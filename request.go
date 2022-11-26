@@ -225,7 +225,6 @@ func (r *Request) Send(a ...interface{}) *Request {
 	r.response, err = r.client.Do(r.request)
 	if err != nil {
 		r.err = err
-		return r
 	}
 
 	return r
