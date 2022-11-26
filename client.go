@@ -81,7 +81,7 @@ func (c *Client) NewRequest() *Request {
 	cReq.SetHeader("Accept", "*/*")
 	cReq.SetHeader("Accept-Language", "en-US,en;q=0.9")
 	cReq.SetHeader("Accept-Encoding", "gzip,deflate,br")
-	cReq.SetHeader("Cache-Control", "max-age=0")
+	cReq.SetHeader("Cache-Control", "no-cache")
 	cReq.SetHeader("Pragma", "no-cache")
 	cReq.SetHeader("User-Agent", c.UserAgent)
 	cReq.SetHeaderOrder(c.HeaderOrder)
