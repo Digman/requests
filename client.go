@@ -120,6 +120,15 @@ func (c *Client) SetCookies(domain string, cookies []*http.Cookie) {
 }
 
 func (c *Client) GetRequestInfo() (bool, string) {
+	_, b, e := c.NewRequest().SetUrl("http://httpbin.org/get").Send().End()
+	if e != nil {
+		return false, e.Error()
+	}
+
+	return true, b
+}
+
+func (c *Client) GetFingerPrint() (bool, string) {
 	_, b, e := c.NewRequest().SetUrl("https://client.tlsfingerprint.io:8443/").Send().End()
 	if e != nil {
 		return false, e.Error()
