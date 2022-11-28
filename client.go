@@ -60,7 +60,8 @@ var defaultHeaderOrder = []string{
 func NewClient(userAgent string) *Client {
 	clientProfile := getClientProfile(userAgent)
 	options := []tls_client.HttpClientOption{
-		tls_client.WithTimeout(30),
+		tls_client.WithTimeout(180),          // Transport timeout(Second)
+		tls_client.WithRequestTimeout(30000), // Request timeout(Millisecond)
 		tls_client.WithClientProfile(clientProfile),
 		tls_client.WithNewCookieJar(),
 		tls_client.WithNotFollowRedirects(),
