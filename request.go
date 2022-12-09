@@ -240,7 +240,13 @@ func (r *Request) End() (*http.Response, string, error) {
 		err      error
 	)
 
-	bodyByte, err = io.ReadAll(r.response.Body)
+	body := r.response.Body
+
+	if r.response.ProtoMajor < 2 {
+		body = http.DecompressBody(r.response)
+	}
+
+	bodyByte, err = io.ReadAll(body)
 	if err != nil {
 		return nil, "", err
 	}
@@ -266,7 +272,13 @@ func (r *Request) EndByte() (*http.Response, []byte, error) {
 		err      error
 	)
 
-	bodyByte, err = io.ReadAll(r.response.Body)
+	body := r.response.Body
+
+	if r.response.ProtoMajor < 2 {
+		body = http.DecompressBody(r.response)
+	}
+
+	bodyByte, err = io.ReadAll(body)
 	if err != nil {
 		return nil, []byte(""), err
 	}
