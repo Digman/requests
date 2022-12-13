@@ -48,6 +48,7 @@ var defaultHeaderOrder = []string{
 	"Accept-Encoding",
 	"Accept-Language",
 	"Cache-Control",
+	"Connection",
 	"Content-Length",
 	"Content-Type",
 	"Cookie",
@@ -55,7 +56,7 @@ var defaultHeaderOrder = []string{
 	"Pragma",
 	"Referer",
 	"User-Agent",
-	"x-requested-with",
+	"X-Requested-With",
 }
 
 func NewClient(userAgent string) *Client {
@@ -86,9 +87,10 @@ func DefaultClient() *Client {
 func (c *Client) NewRequest() *Request {
 	cReq := NewRequest(c.tlsClient)
 	cReq.SetHeader("Accept", "*/*")
-	cReq.SetHeader("Accept-Language", "en-US,en;q=0.9")
+	cReq.SetHeader("Accept-Language", "en-US,en;q=0.9,zh-TW;q=0.8,zh;q=0.7,ja;q=0.6")
 	cReq.SetHeader("Accept-Encoding", "gzip,deflate,br")
 	cReq.SetHeader("Cache-Control", "no-cache")
+	cReq.SetHeader("Connection", "keep-alive")
 	cReq.SetHeader("Pragma", "no-cache")
 	cReq.SetHeader("User-Agent", c.UserAgent)
 	cReq.SetHeaderOrder(c.HeaderOrder)
@@ -131,7 +133,7 @@ func (c *Client) GetRequestInfo() (bool, string) {
 }
 
 func (c *Client) GetFingerPrint() (bool, string) {
-	_, b, e := c.NewRequest().SetUrl("https://client.tlsfingerprint.io:8443/").Send().End()
+	_, b, e := c.NewRequest().SetUrl("https://tls.peet.ws/api/all").Send().End()
 	if e != nil {
 		return false, e.Error()
 	}
