@@ -3,7 +3,7 @@ module github.com/Digman/requests
 go 1.18
 
 require (
-	github.com/Digman/tls-client v1.0.5
+	github.com/Digman/tls-client v1.0.6
 	github.com/bogdanfinn/fhttp v0.5.9
 )
 

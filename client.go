@@ -20,8 +20,9 @@ type Client struct {
 var clientProfiles = map[string]map[string]tls_client.ClientProfile{
 	"Chrome": {
 		"default":    tls_client.DefaultClientProfile,
-		"Chrome/101": tls_client.Chrome_103,
-		"Chrome/102": tls_client.Chrome_103,
+		"Chrome/100": tls_client.Chrome_100,
+		"Chrome/101": tls_client.Chrome_100,
+		"Chrome/102": tls_client.Chrome_102,
 		"Chrome/103": tls_client.Chrome_103,
 		"Chrome/104": tls_client.Chrome_104,
 		"Chrome/105": tls_client.Chrome_105,

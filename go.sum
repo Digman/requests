@@ -1,5 +1,5 @@
-github.com/Digman/tls-client v1.0.5 h1:TK3RcHx46rp5I/b5yklq0PVDpc0ttr6eZYfOMySNd6U=
-github.com/Digman/tls-client v1.0.5/go.mod h1:aRg+QbKwdEsGNKHGIGewJMWWBLh5vfgTD3/mlC9CcKU=
+github.com/Digman/tls-client v1.0.6 h1:vW4+7JtothakF/GpieRM+Z1/Bex8BDI1ZfwvMhsPZHk=
+github.com/Digman/tls-client v1.0.6/go.mod h1:aRg+QbKwdEsGNKHGIGewJMWWBLh5vfgTD3/mlC9CcKU=
 github.com/andybalholm/brotli v1.0.4 h1:V7DdXeJtZscaqfNuAdSRuRFzuiKlHSC/Zh3zl9qY3JY=
 github.com/andybalholm/brotli v1.0.4/go.mod h1:fO7iG3H7G2nSZ7m0zPUDn85XEX2GTukHGRSepvi9Eig=
 github.com/bogdanfinn/fhttp v0.5.9 h1:J2VXWQP09ljqAk8Z0z0CMRelgOmYwcThOcLMzF5FbHU=
