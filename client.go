@@ -123,6 +123,11 @@ func (c *Client) SetCookies(domain string, cookies []*http.Cookie) {
 	c.tlsClient.SetCookies(u, cookies)
 }
 
+func (c *Client) GetCookies(domain string) []*http.Cookie {
+	u := &url.URL{Host: domain, Scheme: "https", Path: "/"}
+	return c.tlsClient.GetCookies(u)
+}
+
 func (c *Client) GetRequestInfo() (bool, string) {
 	_, b, e := c.NewRequest().SetUrl("http://httpbin.org/get").Send().End()
 	if e != nil {
