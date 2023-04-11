@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	tls_client "github.com/Digman/tls-client"
+	JSON "github.com/tidwall/gjson"
+
 	http "github.com/bogdanfinn/fhttp"
 	"io"
 	"mime/multipart"
@@ -253,6 +255,14 @@ func (r *Request) End() (*http.Response, string, error) {
 
 	return r.response, string(bodyByte), nil
 
+}
+
+func (r *Request) EndJson() (*http.Response, JSON.Result, error) {
+	response, body, err := r.End()
+	if err != nil {
+		return nil, JSON.Result{}, err
+	}
+	return response, JSON.Parse(body), nil
 }
 
 func (r *Request) EndResponse() (*http.Response, error) {
