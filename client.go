@@ -7,6 +7,8 @@ import (
 	"strings"
 )
 
+var Timeout = 30000
+
 type Client struct {
 	tlsClient tls_client.HttpClient
 
@@ -62,8 +64,8 @@ var defaultHeaderOrder = []string{
 func NewClient(userAgent string) *Client {
 	clientProfile := getClientProfile(userAgent)
 	options := []tls_client.HttpClientOption{
-		tls_client.WithTimeout(2592000),      // Transport timeout(Second)
-		tls_client.WithRequestTimeout(30000), // Request timeout(Millisecond)
+		tls_client.WithTimeout(2592000),        // Transport timeout(Second)
+		tls_client.WithRequestTimeout(Timeout), // Request timeout(Millisecond)
 		tls_client.WithClientProfile(clientProfile),
 		tls_client.WithNewCookieJar(),
 		tls_client.WithNotFollowRedirects(),
