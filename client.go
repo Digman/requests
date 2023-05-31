@@ -7,8 +7,6 @@ import (
 	"strings"
 )
 
-var Timeout = 30000
-
 type Client struct {
 	tlsClient tls_client.HttpClient
 
@@ -61,29 +59,22 @@ var defaultHeaderOrder = []string{
 	"X-Requested-With",
 }
 
+var defaultUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36"
+
+var defaultWindowSize = [2]int{1440, 900}
+
+var defaultTimeout = 30000
+
 func NewClient(userAgent string) *Client {
-	clientProfile := getClientProfile(userAgent)
-	options := []tls_client.HttpClientOption{
-		tls_client.WithTimeout(2592000),        // Transport timeout(Second)
-		tls_client.WithRequestTimeout(Timeout), // Request timeout(Millisecond)
-		tls_client.WithClientProfile(clientProfile),
-		tls_client.WithNewCookieJar(),
-		tls_client.WithNotFollowRedirects(),
-		tls_client.WithInsecureSkipVerify(),
-		tls_client.WithRandomTLSExtensionOrder(),
-	}
-	tlsClient, _ := tls_client.NewHttpClient(tls_client.NewNoopLogger(), options...)
-	return &Client{
-		tlsClient:   tlsClient,
-		HeaderOrder: defaultHeaderOrder,
-		UserAgent:   userAgent,
-		WindowSize:  [2]int{1440, 900},
-	}
+	return newClient(userAgent, defaultWindowSize, defaultTimeout)
+}
+
+func TimeoutClient(timeout int) *Client {
+	return newClient(defaultUserAgent, defaultWindowSize, timeout)
 }
 
 func DefaultClient() *Client {
-	userAgent := "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36"
-	return NewClient(userAgent)
+	return NewClient(defaultUserAgent)
 }
 
 func (c *Client) NewRequest() *Request {
@@ -146,6 +137,26 @@ func (c *Client) GetFingerPrint() (bool, string) {
 	}
 
 	return true, b
+}
+
+func newClient(userAgent string, windowSize [2]int, timeout int) *Client {
+	clientProfile := getClientProfile(userAgent)
+	options := []tls_client.HttpClientOption{
+		tls_client.WithTimeout(2592000),        // Transport timeout(Second)
+		tls_client.WithRequestTimeout(timeout), // Request timeout(Millisecond)
+		tls_client.WithClientProfile(clientProfile),
+		tls_client.WithNewCookieJar(),
+		tls_client.WithNotFollowRedirects(),
+		tls_client.WithInsecureSkipVerify(),
+		tls_client.WithRandomTLSExtensionOrder(),
+	}
+	tlsClient, _ := tls_client.NewHttpClient(tls_client.NewNoopLogger(), options...)
+	return &Client{
+		tlsClient:   tlsClient,
+		HeaderOrder: defaultHeaderOrder,
+		UserAgent:   userAgent,
+		WindowSize:  windowSize,
+	}
 }
 
 func getClientProfile(userAgent string) tls_client.ClientProfile {
