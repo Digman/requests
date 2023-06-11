@@ -28,6 +28,11 @@ var clientProfiles = map[string]map[string]tls_client.ClientProfile{
 		"Chrome/105": tls_client.Chrome_105,
 		"Chrome/106": tls_client.Chrome_106,
 		"Chrome/107": tls_client.Chrome_107,
+		"Chrome/108": tls_client.Chrome_108,
+		"Chrome/109": tls_client.Chrome_109,
+		"Chrome/110": tls_client.Chrome_110,
+		"Chrome/111": tls_client.Chrome_111,
+		"Chrome/112": tls_client.Chrome_112,
 	},
 	"iPhone": {
 		"default": tls_client.Safari_IOS_15_5,
@@ -131,7 +136,7 @@ func (c *Client) GetRequestInfo() (bool, string) {
 }
 
 func (c *Client) GetFingerPrint() (bool, string) {
-	_, b, e := c.NewRequest().SetUrl("https://tls.peet.ws/api/all").Send().End()
+	_, b, e := c.NewRequest().SetUrl("https://tls.browserleaks.com/json").Send().End()
 	if e != nil {
 		return false, e.Error()
 	}
