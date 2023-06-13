@@ -10,11 +10,12 @@ import (
 type Client struct {
 	tlsClient tls_client.HttpClient
 
-	HeaderOrder []string
-	ProxyUrl    *url.URL
-	RawProxy    string
-	UserAgent   string
-	WindowSize  [2]int
+	ExtraHeaders map[string]string
+	HeaderOrder  []string
+	ProxyUrl     *url.URL
+	RawProxy     string
+	UserAgent    string
+	WindowSize   [2]int
 }
 
 var clientProfiles = map[string]map[string]tls_client.ClientProfile{
@@ -98,6 +99,11 @@ func (c *Client) NewRequest() *Request {
 	cReq.SetHeader("Connection", "keep-alive")
 	cReq.SetHeader("Pragma", "no-cache")
 	cReq.SetHeader("User-Agent", c.UserAgent)
+	if len(c.ExtraHeaders) > 0 {
+		for k, v := range c.ExtraHeaders {
+			cReq.SetHeader(k, v)
+		}
+	}
 	cReq.SetHeaderOrder(c.HeaderOrder)
 	return cReq
 }
