@@ -72,7 +72,7 @@ var defaultHeaderOrder = []string{
 	"X-Requested-With",
 }
 
-var defaultUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36"
+var defaultUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36"
 
 var defaultWindowSize = [2]int{1440, 900}
 
@@ -149,7 +149,7 @@ func (c *Client) GetRequestInfo() (bool, string) {
 }
 
 func (c *Client) GetFingerPrint() (bool, string) {
-	_, b, e := c.NewRequest().SetUrl("https://tls.browserleaks.com/json").Send().End()
+	_, b, e := c.NewRequest().SetUrl("https://tls.peet.ws/api/all").Send().End()
 	if e != nil {
 		return false, e.Error()
 	}
