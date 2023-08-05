@@ -139,6 +139,13 @@ func (c *Client) GetCookies(domain string) []*http.Cookie {
 	return c.tlsClient.GetCookies(u)
 }
 
+func (c *Client) GetUrlCookies(cookieUrl string) []*http.Cookie {
+	if u, err := url.Parse(cookieUrl); err == nil {
+		return c.tlsClient.GetCookies(u)
+	}
+	return nil
+}
+
 func (c *Client) GetRequestInfo() (bool, string) {
 	_, b, e := c.NewRequest().SetUrl("http://httpbin.org/get").Send().End()
 	if e != nil {
