@@ -2,6 +2,7 @@ package requests
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	tls_client "github.com/Digman/tls-client"
@@ -116,6 +117,14 @@ func (r *Request) SetAllData(data url.Values) *Request {
 
 func (r *Request) SetJsonData(s string) *Request {
 	r.jsonData = s
+	return r
+}
+
+func (r *Request) SetJson(data any) *Request {
+	jsonData, err := json.Marshal(data)
+	if err == nil {
+		r.jsonData = string(jsonData)
+	}
 	return r
 }
 
