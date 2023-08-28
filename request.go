@@ -26,6 +26,7 @@ type Request struct {
 	header      map[string]string
 	headerOrder []string
 	cookies     *[]*http.Cookie
+	dataType    interface{}
 	data        url.Values
 	jsonData    string
 	fileData    map[bool]map[string]string
@@ -117,6 +118,7 @@ func (r *Request) SetAllData(data url.Values) *Request {
 
 func (r *Request) SetJsonData(s string) *Request {
 	r.jsonData = s
+	r.dataType = "json"
 	return r
 }
 
@@ -125,6 +127,7 @@ func (r *Request) SetJson(data any) *Request {
 	if err == nil {
 		r.jsonData = string(jsonData)
 	}
+	r.dataType = "json"
 	return r
 }
 
@@ -134,6 +137,7 @@ func (r *Request) SetFileData(name, value string, isFile bool) *Request {
 	} else {
 		r.fileData[isFile] = map[string]string{name: value}
 	}
+	r.dataType = "file"
 	return r
 }
 
@@ -159,8 +163,10 @@ func (r *Request) log(t string) {
 
 func (r *Request) Send(a ...interface{}) *Request {
 	var err error
-
-	if len(a) == 0 || a[0] == "url" {
+	if len(a) > 0 {
+		r.dataType = a[0]
+	}
+	if r.dataType == nil || r.dataType == "url" {
 		var body io.Reader
 		if r.method != "GET" {
 			body = strings.NewReader(r.data.Encode())
@@ -182,7 +188,7 @@ func (r *Request) Send(a ...interface{}) *Request {
 		} else if r.method == "GET" && len(r.data) > 0 {
 			r.request.URL.RawQuery = r.data.Encode()
 		}
-	} else if a[0] == "json" {
+	} else if r.dataType == "json" {
 		r.request, err = http.NewRequest(r.method, r.url, strings.NewReader(r.jsonData))
 		defer r.log("json")
 		if err != nil {
@@ -190,7 +196,7 @@ func (r *Request) Send(a ...interface{}) *Request {
 			return r
 		}
 		r.request.Header.Set("Content-Type", "application/json; charset=UTF-8")
-	} else {
+	} else if r.dataType == "file" {
 		bodyBuf := &bytes.Buffer{}
 		bodyWriter := multipart.NewWriter(bodyBuf)
 		for h, m := range r.fileData {
@@ -220,6 +226,9 @@ func (r *Request) Send(a ...interface{}) *Request {
 		}
 
 		r.request.Header.Set("Content-Type", contentType)
+	} else {
+		r.err = errors.New("unsupported data type")
+		return r
 	}
 	for k, v := range r.header {
 		r.request.Header.Set(k, v)
