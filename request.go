@@ -276,10 +276,16 @@ func (r *Request) End() (*http.Response, string, error) {
 }
 
 func (r *Request) EndJson() (*http.Response, JSON.Result, error) {
+	if r.err != nil {
+		return nil, JSON.Result{}, r.err
+	}
+
 	response, body, err := r.End()
+
 	if err != nil {
 		return nil, JSON.Result{}, err
 	}
+
 	return response, JSON.Parse(body), nil
 }
 
