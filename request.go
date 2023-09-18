@@ -250,7 +250,17 @@ func (r *Request) Send(a ...interface{}) *Request {
 	return r
 }
 
+func (r *Request) Close() {
+	if r.response == nil {
+		return
+	}
+	_ = r.response.Body.Close()
+	r.response.Close = true
+}
+
 func (r *Request) End() (*http.Response, string, error) {
+	defer r.Close()
+
 	if r.err != nil {
 		return nil, "", r.err
 	}
@@ -276,6 +286,8 @@ func (r *Request) End() (*http.Response, string, error) {
 }
 
 func (r *Request) EndJson() (*http.Response, JSON.Result, error) {
+	defer r.Close()
+
 	if r.err != nil {
 		return nil, JSON.Result{}, r.err
 	}
@@ -290,6 +302,8 @@ func (r *Request) EndJson() (*http.Response, JSON.Result, error) {
 }
 
 func (r *Request) EndResponse() (*http.Response, error) {
+	defer r.Close()
+
 	if r.err != nil {
 		return nil, r.err
 	}
@@ -297,6 +311,8 @@ func (r *Request) EndResponse() (*http.Response, error) {
 }
 
 func (r *Request) EndByte() (*http.Response, []byte, error) {
+	defer r.Close()
+
 	if r.err != nil {
 		return nil, []byte(""), r.err
 	}
@@ -322,6 +338,8 @@ func (r *Request) EndByte() (*http.Response, []byte, error) {
 }
 
 func (r *Request) EndFile(savePath, saveFileName string) (*http.Response, error) {
+	defer r.Close()
+
 	if r.err != nil {
 		return nil, r.err
 	}
