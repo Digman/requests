@@ -96,7 +96,7 @@ func (c *Client) NewRequest() *Request {
 	cReq.SetHeader("Accept-Language", "en-US,en;q=0.9,zh-TW;q=0.8,zh;q=0.7")
 	cReq.SetHeader("Accept-Encoding", "gzip,deflate,br")
 	cReq.SetHeader("Cache-Control", "no-cache")
-	cReq.SetHeader("Connection", "keep-alive")
+	// cReq.SetHeader("Connection", "keep-alive")
 	cReq.SetHeader("Pragma", "no-cache")
 	cReq.SetHeader("User-Agent", c.UserAgent)
 	if len(c.ExtraHeaders) > 0 {
