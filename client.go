@@ -164,6 +164,15 @@ func (c *Client) GetFingerPrint() (bool, string) {
 	return true, b
 }
 
+func (c *Client) GetIPLocation() (bool, string) {
+	_, b, e := c.NewRequest().Get("http://ip-api.com/json").Send().End()
+	if e != nil {
+		return false, e.Error()
+	}
+
+	return true, b
+}
+
 func newClient(userAgent string, windowSize [2]int, timeout int) *Client {
 	clientProfile := getClientProfile(userAgent)
 	options := []tls_client.HttpClientOption{
