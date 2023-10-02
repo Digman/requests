@@ -147,7 +147,7 @@ func (c *Client) GetUrlCookies(cookieUrl string) []*http.Cookie {
 }
 
 func (c *Client) GetRequestInfo() (bool, string) {
-	_, b, e := c.NewRequest().SetUrl("http://httpbin.org/get").Send().End()
+	_, b, e := c.NewRequest().Get("http://httpbin.org/get").Send().End()
 	if e != nil {
 		return false, e.Error()
 	}
@@ -156,7 +156,16 @@ func (c *Client) GetRequestInfo() (bool, string) {
 }
 
 func (c *Client) GetFingerPrint() (bool, string) {
-	_, b, e := c.NewRequest().SetUrl("https://tls.peet.ws/api/all").Send().End()
+	_, b, e := c.NewRequest().Get("https://tls.peet.ws/api/all").Send().End()
+	if e != nil {
+		return false, e.Error()
+	}
+
+	return true, b
+}
+
+func (c *Client) GetIPLocation() (bool, string) {
+	_, b, e := c.NewRequest().Post("https://iplocation.com/").Send().End()
 	if e != nil {
 		return false, e.Error()
 	}
