@@ -19,6 +19,9 @@ type Client struct {
 }
 
 var clientProfiles = map[string]map[string]tls_client.ClientProfile{
+	"Android": {
+		"default": tls_client.NikeAndroidMobile,
+	},
 	"Chrome": {
 		"default":    tls_client.DefaultClientProfile,
 		"Chrome/100": tls_client.Chrome_100,
@@ -42,9 +45,6 @@ var clientProfiles = map[string]map[string]tls_client.ClientProfile{
 		"Chrome/118": tls_client.Chrome_117,
 		"Chrome/119": tls_client.Chrome_117,
 		"Chrome/120": tls_client.Chrome_120,
-	},
-	"Android": {
-		"default": tls_client.NikeAndroidMobile,
 	},
 	"iPhone": {
 		"default": tls_client.Safari_IOS_16_0,
