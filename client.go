@@ -59,15 +59,15 @@ var clientProfiles = map[string]map[string]tls_client.ClientProfile{
 }
 
 var defaultHeaderOrder = []string{
+	"content-length",
 	"pragma",
 	"cache-control",
-	"content-length",
 	"sec-ch-ua",
-	"content-type",
 	"sec-ch-ua-mobile",
 	"sec-ch-ua-platform",
 	"upgrade-insecure-requests",
 	"user-agent",
+	"content-type",
 	"x-requested-with",
 	"accept",
 	"origin",
