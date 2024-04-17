@@ -61,11 +61,14 @@ var clientProfiles = map[string]map[string]tls_client.ClientProfile{
 var defaultHeaderOrder = []string{
 	"pragma",
 	"cache-control",
+	"content-length",
 	"sec-ch-ua",
+	"content-type",
 	"sec-ch-ua-mobile",
 	"sec-ch-ua-platform",
 	"upgrade-insecure-requests",
 	"user-agent",
+	"x-requested-with",
 	"accept",
 	"origin",
 	"host",
@@ -76,11 +79,7 @@ var defaultHeaderOrder = []string{
 	"referer",
 	"accept-encoding",
 	"accept-language",
-	"content-length",
-	"connection",
-	"content-type",
 	"cookie",
-	"x-requested-with",
 }
 
 var defaultUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36"
