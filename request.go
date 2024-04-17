@@ -89,9 +89,6 @@ func (r *Request) SetHeader(name, value string) *Request {
 }
 
 func (r *Request) SetHeaderOrder(order []string) *Request {
-	for i, s := range order {
-		order[i] = http.CanonicalHeaderKey(s)
-	}
 	r.headerOrder = order
 	return r
 }
