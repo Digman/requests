@@ -82,22 +82,13 @@ var clientProfiles = []profileList{
 		term:     "Version",
 		defaults: tls_client.Safari_16_0,
 		profiles: map[string]tls_client.ClientProfile{
-			"Version/15": tls_client.Safari_15_6_1,
+			"Version/15":     tls_client.Safari_15_6_1,
+			"iPhone OS 15_5": tls_client.Safari_IOS_15_5,
+			"iPhone OS 15_6": tls_client.Safari_IOS_15_6,
+			"iPhone OS 16_":  tls_client.Safari_IOS_16_0,
+			"iPhone OS 17_":  tls_client.Safari_IOS_17_0,
+			"iPad":           tls_client.Safari_Ipad_15_6,
 		},
-	},
-	{
-		term:     "iPhone",
-		defaults: tls_client.Safari_IOS_16_0,
-		profiles: map[string]tls_client.ClientProfile{
-			"OS 15_5": tls_client.Safari_IOS_15_5,
-			"OS 15_6": tls_client.Safari_IOS_15_6,
-			"OS 16_":  tls_client.Safari_IOS_16_0,
-			"OS 17_":  tls_client.Safari_IOS_17_0,
-		},
-	},
-	{
-		term:     "iPad",
-		defaults: tls_client.Safari_Ipad_15_6,
 	},
 }
 
