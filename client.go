@@ -114,11 +114,14 @@ var defaultHeaderOrder = []string{
 	"cookie",
 }
 
+// defaultUserAgent default useragent
 var defaultUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
 
+// defaultWindowSize default window size
 var defaultWindowSize = [2]int{1440, 900}
 
-var defaultTimeout = 30000
+// defaultTimeout default request timeout in milliseconds
+var defaultTimeout = 20000
 
 func NewClient(userAgent string) *Client {
 	return newClient(userAgent, defaultWindowSize, defaultTimeout)
@@ -138,7 +141,6 @@ func (c *Client) NewRequest() *Request {
 	cReq.SetHeader("Accept-Language", "en-US,en;q=0.9,zh-TW;q=0.8,zh;q=0.7")
 	cReq.SetHeader("Accept-Encoding", "gzip,deflate,br")
 	cReq.SetHeader("Cache-Control", "no-cache")
-	// cReq.SetHeader("Connection", "keep-alive")
 	cReq.SetHeader("Pragma", "no-cache")
 	cReq.SetHeader("User-Agent", c.UserAgent)
 	if len(c.ExtraHeaders) > 0 {
@@ -174,6 +176,12 @@ func (c *Client) SetAutoRedirect(b bool) {
 func (c *Client) SetCookies(domain string, cookies []*http.Cookie) {
 	u := &url.URL{Host: domain, Scheme: "https", Path: "/"}
 	c.tlsClient.SetCookies(u, cookies)
+}
+
+func (c *Client) SetUrlCookies(cookieUrl string, cookies []*http.Cookie) {
+	if u, err := url.Parse(cookieUrl); err == nil {
+		c.tlsClient.SetCookies(u, cookies)
+	}
 }
 
 func (c *Client) GetCookies(domain string) []*http.Cookie {
@@ -219,12 +227,13 @@ func newClient(userAgent string, windowSize [2]int, timeout int) *Client {
 	clientProfile := getClientProfile(userAgent)
 	cookieJar := tls_client.NewCookieJar()
 	options := []tls_client.HttpClientOption{
-		tls_client.WithTimeoutSeconds(timeout),
+		tls_client.WithTimeoutMilliseconds(timeout),
 		tls_client.WithClientProfile(clientProfile),
 		tls_client.WithCookieJar(cookieJar),
 		tls_client.WithNotFollowRedirects(),
 		tls_client.WithInsecureSkipVerify(),
 		tls_client.WithRandomTLSExtensionOrder(),
+		tls_client.WithIdleTimeoutSeconds(90),
 	}
 	tlsClient, _ := tls_client.NewHttpClient(tls_client.NewNoopLogger(), options...)
 	return &Client{
