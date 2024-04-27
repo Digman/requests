@@ -2,6 +2,7 @@ package requests
 
 import (
 	tls_client "github.com/Digman/tls-client"
+	"github.com/Digman/tls-client/profiles"
 	http "github.com/bogdanfinn/fhttp"
 	"net/url"
 	"strings"
@@ -20,74 +21,71 @@ type Client struct {
 
 type profileList struct {
 	term     string
-	defaults tls_client.ClientProfile
-	profiles map[string]tls_client.ClientProfile
+	defaults profiles.ClientProfile
+	profiles map[string]profiles.ClientProfile
 }
 
 var clientProfiles = []profileList{
 	{
 		term:     "Chrome",
-		defaults: tls_client.DefaultClientProfile,
-		profiles: map[string]tls_client.ClientProfile{
-			"Chrome/100": tls_client.Chrome_100,
-			"Chrome/101": tls_client.Chrome_100,
-			"Chrome/102": tls_client.Chrome_102,
-			"Chrome/103": tls_client.Chrome_103,
-			"Chrome/104": tls_client.Chrome_104,
-			"Chrome/105": tls_client.Chrome_105,
-			"Chrome/106": tls_client.Chrome_106,
-			"Chrome/107": tls_client.Chrome_107,
-			"Chrome/108": tls_client.Chrome_108,
-			"Chrome/109": tls_client.Chrome_109,
-			"Chrome/110": tls_client.Chrome_110,
-			"Chrome/111": tls_client.Chrome_111,
-			"Chrome/112": tls_client.Chrome_112,
-			"Chrome/113": tls_client.Chrome_112,
-			"Chrome/114": tls_client.Chrome_112,
-			"Chrome/115": tls_client.Chrome_112,
-			"Chrome/116": tls_client.Chrome_112,
-			"Chrome/117": tls_client.Chrome_117,
-			"Chrome/118": tls_client.Chrome_117,
-			"Chrome/119": tls_client.Chrome_117,
-			"Chrome/120": tls_client.Chrome_120,
+		defaults: profiles.DefaultClientProfile,
+		profiles: map[string]profiles.ClientProfile{
+			"Chrome/103": profiles.Chrome_103,
+			"Chrome/104": profiles.Chrome_104,
+			"Chrome/105": profiles.Chrome_105,
+			"Chrome/106": profiles.Chrome_106,
+			"Chrome/107": profiles.Chrome_107,
+			"Chrome/108": profiles.Chrome_108,
+			"Chrome/109": profiles.Chrome_109,
+			"Chrome/110": profiles.Chrome_110,
+			"Chrome/111": profiles.Chrome_111,
+			"Chrome/112": profiles.Chrome_112,
+			"Chrome/113": profiles.Chrome_112,
+			"Chrome/114": profiles.Chrome_112,
+			"Chrome/115": profiles.Chrome_112,
+			"Chrome/116": profiles.Chrome_112,
+			"Chrome/117": profiles.Chrome_117,
+			"Chrome/118": profiles.Chrome_117,
+			"Chrome/119": profiles.Chrome_117,
+			"Chrome/120": profiles.Chrome_120,
 		},
 	},
 	{
 		term:     "Firefox",
-		defaults: tls_client.Firefox_123,
-		profiles: map[string]tls_client.ClientProfile{
-			"Firefox/102": tls_client.Firefox_102,
-			"Firefox/104": tls_client.Firefox_104,
-			"Firefox/105": tls_client.Firefox_105,
-			"Firefox/106": tls_client.Firefox_106,
-			"Firefox/108": tls_client.Firefox_108,
-			"Firefox/109": tls_client.Firefox_108,
-			"Firefox/110": tls_client.Firefox_110,
-			"Firefox/111": tls_client.Firefox_110,
-			"Firefox/112": tls_client.Firefox_110,
-			"Firefox/113": tls_client.Firefox_110,
-			"Firefox/114": tls_client.Firefox_110,
-			"Firefox/115": tls_client.Firefox_110,
-			"Firefox/116": tls_client.Firefox_110,
-			"Firefox/117": tls_client.Firefox_117,
-			"Firefox/118": tls_client.Firefox_117,
-			"Firefox/119": tls_client.Firefox_117,
-			"Firefox/120": tls_client.Firefox_120,
-			"Firefox/121": tls_client.Firefox_120,
-			"Firefox/122": tls_client.Firefox_120,
-			"Firefox/123": tls_client.Firefox_123,
+		defaults: profiles.Firefox_123,
+		profiles: map[string]profiles.ClientProfile{
+			"Firefox/102": profiles.Firefox_102,
+			"Firefox/104": profiles.Firefox_104,
+			"Firefox/105": profiles.Firefox_105,
+			"Firefox/106": profiles.Firefox_106,
+			"Firefox/108": profiles.Firefox_108,
+			"Firefox/109": profiles.Firefox_108,
+			"Firefox/110": profiles.Firefox_110,
+			"Firefox/111": profiles.Firefox_110,
+			"Firefox/112": profiles.Firefox_110,
+			"Firefox/113": profiles.Firefox_110,
+			"Firefox/114": profiles.Firefox_110,
+			"Firefox/115": profiles.Firefox_110,
+			"Firefox/116": profiles.Firefox_110,
+			"Firefox/117": profiles.Firefox_117,
+			"Firefox/118": profiles.Firefox_117,
+			"Firefox/119": profiles.Firefox_117,
+			"Firefox/120": profiles.Firefox_120,
+			"Firefox/121": profiles.Firefox_120,
+			"Firefox/122": profiles.Firefox_120,
+			"Firefox/123": profiles.Firefox_123,
 		},
 	},
 	{
 		term:     "Version",
-		defaults: tls_client.Safari_16_0,
-		profiles: map[string]tls_client.ClientProfile{
-			"Version/15":     tls_client.Safari_15_6_1,
-			"iPhone OS 15_5": tls_client.Safari_IOS_15_5,
-			"iPhone OS 15_6": tls_client.Safari_IOS_15_6,
-			"iPhone OS 16_":  tls_client.Safari_IOS_16_0,
-			"iPhone OS 17_":  tls_client.Safari_IOS_17_0,
-			"iPad":           tls_client.Safari_Ipad_15_6,
+		defaults: profiles.Safari_16_0,
+		profiles: map[string]profiles.ClientProfile{
+			"Version/15":     profiles.Safari_15_6_1,
+			"iPhone OS 15_5": profiles.Safari_IOS_15_5,
+			"iPhone OS 15_6": profiles.Safari_IOS_15_6,
+			"iPhone OS 16_":  profiles.Safari_IOS_16_0,
+			"iPhone OS 17_":  profiles.Safari_IOS_17_0,
+			"iPad":           profiles.Safari_Ipad_15_6,
 		},
 	},
 }
@@ -219,11 +217,11 @@ func (c *Client) GetIPLocation() (bool, string) {
 
 func newClient(userAgent string, windowSize [2]int, timeout int) *Client {
 	clientProfile := getClientProfile(userAgent)
+	cookieJar := tls_client.NewCookieJar()
 	options := []tls_client.HttpClientOption{
-		tls_client.WithTimeout(2592000),        // Transport timeout(Second)
-		tls_client.WithRequestTimeout(timeout), // Request timeout(Millisecond)
+		tls_client.WithTimeoutSeconds(timeout),
 		tls_client.WithClientProfile(clientProfile),
-		tls_client.WithNewCookieJar(),
+		tls_client.WithCookieJar(cookieJar),
 		tls_client.WithNotFollowRedirects(),
 		tls_client.WithInsecureSkipVerify(),
 		tls_client.WithRandomTLSExtensionOrder(),
@@ -237,8 +235,8 @@ func newClient(userAgent string, windowSize [2]int, timeout int) *Client {
 	}
 }
 
-func getClientProfile(userAgent string) tls_client.ClientProfile {
-	profile := tls_client.DefaultClientProfile
+func getClientProfile(userAgent string) profiles.ClientProfile {
+	profile := profiles.DefaultClientProfile
 	for _, clientProfile := range clientProfiles {
 		if strings.Contains(userAgent, clientProfile.term) {
 			profile = clientProfile.defaults
