@@ -42,7 +42,7 @@ var clientProfiles = []profileList{
 			"Chrome/112": profiles.Chrome_112,
 			"Chrome/113": profiles.Chrome_112_PSK,
 			"Chrome/114": profiles.Chrome_114_PSK,
-			"Chrome/115": profiles.Chrome_114_PSK,
+			"Chrome/115": profiles.Chrome_115_PSK,
 			"Chrome/116": profiles.Chrome_116_PSK,
 			"Chrome/117": profiles.Chrome_117_PSK,
 			"Chrome/118": profiles.Chrome_117_PSK,
