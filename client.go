@@ -126,7 +126,7 @@ var defaultUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWeb
 var defaultWindowSize = [2]int{1440, 900}
 
 // defaultTimeout default request timeout in milliseconds
-var defaultTimeout = 20000
+var defaultTimeout = 30000
 
 func NewClient(userAgent string) *Client {
 	return newClient(userAgent, defaultWindowSize, defaultTimeout)
