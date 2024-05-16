@@ -262,6 +262,10 @@ func (r *Request) End() (*http.Response, string, error) {
 		return nil, "", r.err
 	}
 
+	if r.response == nil {
+		return nil, "", errors.New("response empty")
+	}
+
 	var (
 		bodyByte []byte
 		err      error
@@ -283,20 +287,10 @@ func (r *Request) End() (*http.Response, string, error) {
 }
 
 func (r *Request) EndJson() (*http.Response, JSON.Result, error) {
-	defer r.Close()
-
-	if r.err != nil {
-		return nil, JSON.Result{}, r.err
-	}
-
 	response, body, err := r.End()
 
 	if err != nil {
 		return nil, JSON.Result{}, err
-	}
-
-	if response == nil {
-		return nil, JSON.Result{}, errors.New("response empty")
 	}
 
 	return response, JSON.Parse(body), nil
