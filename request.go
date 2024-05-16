@@ -295,6 +295,10 @@ func (r *Request) EndJson() (*http.Response, JSON.Result, error) {
 		return nil, JSON.Result{}, err
 	}
 
+	if response == nil {
+		return nil, JSON.Result{}, errors.New("response empty")
+	}
+
 	return response, JSON.Parse(body), nil
 }
 
