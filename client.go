@@ -175,8 +175,8 @@ func (c *Client) SetProxy(proxyUrl string) error {
 	return c.tlsClient.SetProxy(proxyUrl)
 }
 
-func (c *Client) SetTimout(milliseconds int64) {
-	duration := time.Duration(milliseconds) * time.Millisecond
+func (c *Client) SetTimout(ms int64) {
+	duration := time.Duration(ms) * time.Millisecond
 	c.tlsClient.SetTimeout(duration)
 }
 
