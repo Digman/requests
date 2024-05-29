@@ -6,6 +6,7 @@ import (
 	http "github.com/bogdanfinn/fhttp"
 	"net/url"
 	"strings"
+	"time"
 )
 
 type Client struct {
@@ -172,6 +173,16 @@ func (c *Client) SetProxy(proxyUrl string) error {
 
 	}
 	return c.tlsClient.SetProxy(proxyUrl)
+}
+
+func (c *Client) SetTimout(milliseconds int64) {
+	duration := time.Duration(milliseconds) * time.Millisecond
+	c.tlsClient.SetTimeout(duration)
+}
+
+func (c *Client) GetTimout() int64 {
+	duration := c.tlsClient.GetTimeout()
+	return duration.Milliseconds()
 }
 
 func (c *Client) SetAutoRedirect(b bool) {
