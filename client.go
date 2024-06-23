@@ -239,7 +239,7 @@ func newClient(userAgent string, windowSize [2]int, timeout int) *Client {
 		tls_client.WithNotFollowRedirects(),
 		tls_client.WithInsecureSkipVerify(),
 		tls_client.WithRandomTLSExtensionOrder(),
-		tls_client.WithIdleTimeoutSeconds(90),
+		tls_client.WithIdleTimeoutSeconds(600),
 	}
 	tlsClient, _ := tls_client.NewHttpClient(tls_client.NewNoopLogger(), options...)
 	return &Client{
