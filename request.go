@@ -163,6 +163,7 @@ func (r *Request) Send(a ...interface{}) *Request {
 	if len(a) > 0 {
 		r.dataType = a[0]
 	}
+	r.err = nil
 	if r.dataType == nil || r.dataType == "url" {
 		var body io.Reader
 		if r.method != "GET" {
