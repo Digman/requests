@@ -158,6 +158,14 @@ func (c *Client) NewRequest() *Request {
 	return cReq
 }
 
+func (c *Client) SetKeepAlive(b bool) {
+	if b {
+		c.ExtraHeaders["Connection"] = "keep-alive"
+	} else {
+		c.ExtraHeaders["Connection"] = "close"
+	}
+}
+
 func (c *Client) SetProxy(proxyUrl string) error {
 	c.RawProxy = proxyUrl
 	c.ProxyUrl = nil
