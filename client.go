@@ -84,9 +84,10 @@ var clientProfiles = []profileList{
 	},
 	{
 		term:     "Version",
-		defaults: profiles.Safari_IOS_17_0,
+		defaults: profiles.Safari_15_6_1,
 		profiles: map[string]profiles.ClientProfile{
 			"Version/15":     profiles.Safari_15_6_1,
+			"Version/16":     profiles.Safari_16_0,
 			"iPhone OS 15_5": profiles.Safari_IOS_15_5,
 			"iPhone OS 15_6": profiles.Safari_IOS_15_6,
 			"iPhone OS 16_":  profiles.Safari_IOS_16_0,
