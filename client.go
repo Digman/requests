@@ -161,6 +161,9 @@ func (c *Client) NewRequest() *Request {
 }
 
 func (c *Client) SetKeepAlive(b bool) {
+	if c.ExtraHeaders == nil {
+		c.ExtraHeaders = make(map[string]string)
+	}
 	if b {
 		c.ExtraHeaders["Connection"] = "keep-alive"
 	} else {
