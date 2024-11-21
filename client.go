@@ -54,6 +54,11 @@ var clientProfiles = []profileList{
 			"Chrome/124": profiles.Chrome_124_PSK,
 			"Chrome/125": profiles.Chrome_124_PSK,
 			"Chrome/126": profiles.Chrome_124_PSK,
+			"Chrome/127": profiles.Chrome_124_PSK,
+			"Chrome/128": profiles.Chrome_124_PSK,
+			"Chrome/129": profiles.Chrome_124_PSK,
+			"Chrome/130": profiles.Chrome_124_PSK,
+			"Chrome/131": profiles.Chrome_131_PSK,
 		},
 	},
 	{
