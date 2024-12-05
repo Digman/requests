@@ -288,13 +288,13 @@ func (r *Request) End() (*http.Response, string, error) {
 }
 
 func (r *Request) EndJson() (*http.Response, JSON.Result, error) {
-	response, body, err := r.End()
+	response, body, err := r.EndByte()
 
 	if err != nil {
 		return nil, JSON.Result{}, err
 	}
 
-	return response, JSON.Parse(body), nil
+	return response, JSON.ParseBytes(body), nil
 }
 
 func (r *Request) EndResponse() (*http.Response, error) {
@@ -303,6 +303,10 @@ func (r *Request) EndResponse() (*http.Response, error) {
 	if r.err != nil {
 		return nil, r.err
 	}
+
+	// fix keep-alive
+	_, _ = io.ReadAll(r.response.Body)
+
 	return r.response, nil
 }
 
