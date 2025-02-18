@@ -59,6 +59,7 @@ var clientProfiles = []profileList{
 			"Chrome/129": profiles.Chrome_124_PSK,
 			"Chrome/130": profiles.Chrome_124_PSK,
 			"Chrome/131": profiles.Chrome_131_PSK,
+			"Chrome/133": profiles.Chrome_133_PSK,
 		},
 	},
 	{
@@ -85,6 +86,8 @@ var clientProfiles = []profileList{
 			"Firefox/121": profiles.Firefox_123,
 			"Firefox/122": profiles.Firefox_123,
 			"Firefox/123": profiles.Firefox_123,
+			"Firefox/132": profiles.Firefox_132,
+			"Firefox/133": profiles.Firefox_133,
 		},
 	},
 	{
@@ -128,7 +131,7 @@ var defaultHeaderOrder = []string{
 }
 
 // defaultUserAgent default useragent
-var defaultUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+var defaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36"
 
 // defaultWindowSize default window size
 var defaultWindowSize = [2]int{1440, 900}
