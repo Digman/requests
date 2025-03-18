@@ -64,7 +64,7 @@ var clientProfiles = []profileList{
 	},
 	{
 		term:     "Firefox",
-		defaults: profiles.Firefox_123,
+		defaults: profiles.Firefox_135,
 		profiles: map[string]profiles.ClientProfile{
 			"Firefox/102": profiles.Firefox_102,
 			"Firefox/104": profiles.Firefox_104,
@@ -88,6 +88,7 @@ var clientProfiles = []profileList{
 			"Firefox/123": profiles.Firefox_123,
 			"Firefox/132": profiles.Firefox_132,
 			"Firefox/133": profiles.Firefox_133,
+			"Firefox/135": profiles.Firefox_135,
 		},
 	},
 	{
