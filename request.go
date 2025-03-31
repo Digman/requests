@@ -108,6 +108,10 @@ func (r *Request) SetData(name, value string) *Request {
 	return r
 }
 
+func (r *Request) GetAllData() url.Values {
+	return r.data
+}
+
 func (r *Request) SetAllData(data url.Values) *Request {
 	r.data = data
 	return r
