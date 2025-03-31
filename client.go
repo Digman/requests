@@ -19,6 +19,13 @@ type Client struct {
 	WindowSize   [2]int
 }
 
+type CertPinning struct {
+	// CertificatePins host => certificatePins
+	CertificatePins map[string][]string
+	// BadPinHandler func to handle error
+	BadPinHandler tls_client.BadPinHandlerFunc
+}
+
 type profileList struct {
 	term     string
 	defaults profiles.ClientProfile
@@ -140,8 +147,8 @@ var defaultWindowSize = [2]int{1440, 900}
 // defaultTimeout default request timeout in milliseconds
 var defaultTimeout = 30000
 
-func NewClient(userAgent string) *Client {
-	return newClient(userAgent, defaultWindowSize, defaultTimeout)
+func NewClient(userAgent string, cp ...*CertPinning) *Client {
+	return newClient(userAgent, defaultWindowSize, defaultTimeout, cp...)
 }
 
 func TimeoutClient(timeout int) *Client {
@@ -251,9 +258,10 @@ func (c *Client) GetIPLocation() (bool, string) {
 	return true, b
 }
 
-func newClient(userAgent string, windowSize [2]int, timeout int) *Client {
+func newClient(userAgent string, windowSize [2]int, timeout int, cp ...*CertPinning) *Client {
 	clientProfile := getClientProfile(userAgent)
 	cookieJar := tls_client.NewCookieJar()
+	connectHeader := http.Header{"User-Agent": {userAgent}}
 	options := []tls_client.HttpClientOption{
 		tls_client.WithTimeoutMilliseconds(timeout),
 		tls_client.WithClientProfile(clientProfile),
@@ -261,6 +269,12 @@ func newClient(userAgent string, windowSize [2]int, timeout int) *Client {
 		tls_client.WithNotFollowRedirects(),
 		tls_client.WithInsecureSkipVerify(),
 		tls_client.WithRandomTLSExtensionOrder(),
+		tls_client.WithConnectHeaders(connectHeader),
+	}
+	if len(cp) > 0 && cp[0] != nil {
+		options = append(options, tls_client.WithCertificatePinning(
+			cp[0].CertificatePins, cp[0].BadPinHandler),
+		)
 	}
 	tlsClient, _ := tls_client.NewHttpClient(tls_client.NewNoopLogger(), options...)
 	return &Client{
