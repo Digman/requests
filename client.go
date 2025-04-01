@@ -286,19 +286,17 @@ func newClient(userAgent string, windowSize [2]int, timeout int, cp ...*CertPinn
 }
 
 func getClientProfile(userAgent string) profiles.ClientProfile {
-	profile := profiles.DefaultClientProfile
 	for _, clientProfile := range clientProfiles {
 		if strings.Contains(userAgent, clientProfile.term) {
-			profile = clientProfile.defaults
 			for k, v := range clientProfile.profiles {
 				if strings.Contains(userAgent, k) {
-					profile = v
-					break
+					return v
 				}
 			}
+			return clientProfile.defaults
 		}
 	}
-	return profile
+	return profiles.DefaultClientProfile
 }
 
 func isUrl(path string) bool {
