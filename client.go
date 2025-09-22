@@ -1,11 +1,12 @@
 package requests
 
 import (
+	"net/url"
+	"strings"
+
 	tls_client "github.com/Digman/tls-client"
 	"github.com/Digman/tls-client/profiles"
 	http "github.com/bogdanfinn/fhttp"
-	"net/url"
-	"strings"
 )
 
 type Client struct {
@@ -110,7 +111,7 @@ var clientProfiles = []profileList{
 			"iPhone OS 17_":  profiles.Safari_IOS_17_0,
 			"iPhone OS 18_0": profiles.Safari_IOS_18_0,
 			"iPhone OS 18_":  profiles.Safari_IOS_18_5,
-			"iPad":           profiles.Safari_Ipad_15_6,
+			"iPad":           profiles.Safari_IOS_18_5,
 		},
 	},
 }
