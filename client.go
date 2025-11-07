@@ -210,6 +210,10 @@ func (c *Client) SetAutoRedirect(b bool) {
 	c.tlsClient.SetFollowRedirect(b)
 }
 
+func (c *Client) NewCookies() {
+	c.tlsClient.SetCookieJar(tls_client.NewCookieJar())
+}
+
 func (c *Client) SetCookies(domain string, cookies []*http.Cookie) {
 	u := &url.URL{Host: domain, Scheme: "https", Path: "/"}
 	c.tlsClient.SetCookies(u, cookies)
