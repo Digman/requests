@@ -5,16 +5,18 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+
 	tls_client "github.com/Digman/tls-client"
 	JSON "github.com/tidwall/gjson"
 
-	http "github.com/bogdanfinn/fhttp"
 	"io"
 	"mime/multipart"
 	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
+
+	http "github.com/bogdanfinn/fhttp"
 )
 
 type Request struct {
@@ -85,6 +87,13 @@ func (r *Request) SetUrl(url string) *Request {
 
 func (r *Request) SetHeader(name, value string) *Request {
 	r.header[name] = value
+	return r
+}
+
+func (r *Request) SetHeaders(values map[string]string) *Request {
+	for k, v := range values {
+		r.header[k] = v
+	}
 	return r
 }
 
