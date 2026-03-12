@@ -127,7 +127,9 @@ var clientProfiles = []profileList{
 			"iPhone OS 17_":  profiles.Safari_IOS_17_0,
 			"iPhone OS 18_0": profiles.Safari_IOS_18_0,
 			"iPhone OS 18_":  profiles.Safari_26,
-			"iPad":           profiles.Safari_26,
+			"CPU OS 17_":     profiles.Safari_IOS_17_0,
+			"CPU OS 18_0":    profiles.Safari_IOS_18_0,
+			"CPU OS 18_":     profiles.Safari_26,
 		},
 	},
 }
