@@ -67,7 +67,20 @@ var clientProfiles = []profileList{
 			"Chrome/129": profiles.Chrome_124_PSK,
 			"Chrome/130": profiles.Chrome_130_PSK,
 			"Chrome/131": profiles.Chrome_131_PSK,
+			"Chrome/132": profiles.Chrome_132_PSK,
 			"Chrome/133": profiles.Chrome_133_PSK,
+			"Chrome/134": profiles.Chrome_134_PSK,
+			"Chrome/135": profiles.Chrome_135_PSK,
+			"Chrome/136": profiles.Chrome_136_PSK,
+			"Chrome/137": profiles.Chrome_137_PSK,
+			"Chrome/138": profiles.Chrome_138_PSK,
+			"Chrome/139": profiles.Chrome_139_PSK,
+			"Chrome/140": profiles.Chrome_140_PSK,
+			"Chrome/141": profiles.Chrome_141_PSK,
+			"Chrome/142": profiles.Chrome_142_PSK,
+			"Chrome/143": profiles.Chrome_143_PSK,
+			"Chrome/144": profiles.Chrome_144_PSK,
+			"Chrome/145": profiles.Chrome_145_PSK,
 		},
 	},
 	{
@@ -101,17 +114,20 @@ var clientProfiles = []profileList{
 	},
 	{
 		term:     "Version",
-		defaults: profiles.Safari_15_6_1,
+		defaults: profiles.Safari_26,
 		profiles: map[string]profiles.ClientProfile{
 			"Version/15":     profiles.Safari_15_6_1,
 			"Version/16":     profiles.Safari_16_0,
+			"Version/17":     profiles.Safari_IOS_17_0,
+			"Version/18":     profiles.Safari_IOS_18_5,
+			"Version/26":     profiles.Safari_26,
 			"iPhone OS 15_5": profiles.Safari_IOS_15_5,
 			"iPhone OS 15_6": profiles.Safari_IOS_15_6,
 			"iPhone OS 16_":  profiles.Safari_IOS_16_0,
 			"iPhone OS 17_":  profiles.Safari_IOS_17_0,
 			"iPhone OS 18_0": profiles.Safari_IOS_18_0,
-			"iPhone OS 18_":  profiles.Safari_IOS_18_5,
-			"iPad":           profiles.Safari_IOS_18_5,
+			"iPhone OS 18_":  profiles.Safari_26,
+			"iPad":           profiles.Safari_26,
 		},
 	},
 }
@@ -141,7 +157,7 @@ var defaultHeaderOrder = []string{
 }
 
 // defaultUserAgent default useragent
-var defaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36"
+var defaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36"
 
 // defaultWindowSize default window size
 var defaultWindowSize = [2]int{1440, 900}
@@ -274,8 +290,12 @@ func newClient(userAgent string, windowSize [2]int, timeout int, cp ...*CertPinn
 		tls_client.WithCookieJar(cookieJar),
 		tls_client.WithNotFollowRedirects(),
 		tls_client.WithInsecureSkipVerify(),
-		tls_client.WithRandomTLSExtensionOrder(),
 		tls_client.WithConnectHeaders(connectHeader),
+	}
+	// Chrome 使用 extension 隨機排列（與真實 Chrome SSL_set_permute_extensions 一致）
+	// Safari/Firefox 不做 extension 隨機排列，順序固定
+	if !strings.Contains(userAgent, "Version/") {
+		options = append(options, tls_client.WithRandomTLSExtensionOrder())
 	}
 	if len(cp) > 0 && cp[0] != nil {
 		options = append(options, tls_client.WithCertificatePinning(
