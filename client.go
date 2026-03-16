@@ -81,11 +81,12 @@ var clientProfiles = []profileList{
 			"Chrome/143": profiles.Chrome_143_PSK,
 			"Chrome/144": profiles.Chrome_144_PSK,
 			"Chrome/145": profiles.Chrome_145_PSK,
+			"Chrome/146": profiles.Chrome_146_PSK,
 		},
 	},
 	{
 		term:     "Firefox",
-		defaults: profiles.Firefox_135,
+		defaults: profiles.Firefox_147,
 		profiles: map[string]profiles.ClientProfile{
 			"Firefox/102": profiles.Firefox_102,
 			"Firefox/104": profiles.Firefox_104,
@@ -110,6 +111,18 @@ var clientProfiles = []profileList{
 			"Firefox/132": profiles.Firefox_132,
 			"Firefox/133": profiles.Firefox_133,
 			"Firefox/135": profiles.Firefox_135,
+			"Firefox/136": profiles.Firefox_135,
+			"Firefox/137": profiles.Firefox_135,
+			"Firefox/138": profiles.Firefox_135,
+			"Firefox/139": profiles.Firefox_135,
+			"Firefox/140": profiles.Firefox_135,
+			"Firefox/141": profiles.Firefox_135,
+			"Firefox/142": profiles.Firefox_135,
+			"Firefox/143": profiles.Firefox_135,
+			"Firefox/144": profiles.Firefox_135,
+			"Firefox/145": profiles.Firefox_135,
+			"Firefox/146": profiles.Firefox_146_PSK,
+			"Firefox/147": profiles.Firefox_147,
 		},
 	},
 	{
@@ -126,10 +139,10 @@ var clientProfiles = []profileList{
 			"iPhone OS 16_":  profiles.Safari_IOS_16_0,
 			"iPhone OS 17_":  profiles.Safari_IOS_17_0,
 			"iPhone OS 18_0": profiles.Safari_IOS_18_0,
-			"iPhone OS 18_":  profiles.Safari_26,
+			"iPhone OS 18_":  profiles.Safari_IOS_26_0,
 			"CPU OS 17_":     profiles.Safari_IOS_17_0,
 			"CPU OS 18_0":    profiles.Safari_IOS_18_0,
-			"CPU OS 18_":     profiles.Safari_26,
+			"CPU OS 18_":     profiles.Safari_IOS_26_0,
 		},
 	},
 }
@@ -159,7 +172,7 @@ var defaultHeaderOrder = []string{
 }
 
 // defaultUserAgent default useragent
-var defaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36"
+var defaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
 
 // defaultWindowSize default window size
 var defaultWindowSize = [2]int{1440, 900}
