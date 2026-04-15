@@ -263,8 +263,10 @@ func (c *Client) SetKeepAlive(b bool) {
 		c.ExtraHeaders = make(map[string]string)
 	}
 	if b {
-		c.ExtraHeaders["Connection"] = "keep-alive"
+		// 恢復默認保活：刪除顯式 close 標記（Chrome H2 不發 Connection 頭，H1 默認 keep-alive）
+		delete(c.ExtraHeaders, "Connection")
 	} else {
+		// fhttp 的 isConnectionCloseRequest 會識別此 header 並在 stream 結束後關連線
 		c.ExtraHeaders["Connection"] = "close"
 	}
 }
