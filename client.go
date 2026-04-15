@@ -1,8 +1,10 @@
 package requests
 
 import (
+	"maps"
 	"net/url"
 	"strings"
+	"time"
 
 	tls_client "github.com/Digman/tls-client"
 	"github.com/Digman/tls-client/profiles"
@@ -18,6 +20,9 @@ type Client struct {
 	RawProxy     string
 	UserAgent    string
 	WindowSize   [2]int
+
+	// 預組裝請求頭模板，避免每次 NewRequest 重複 Set
+	headerTemplate map[string]string
 }
 
 type CertPinning struct {
@@ -180,12 +185,51 @@ var defaultWindowSize = [2]int{1440, 900}
 // defaultTimeout default request timeout in milliseconds
 var defaultTimeout = 30000
 
+// PoolConfig 連線池容量設定，比直接暴露 tls_client.TransportOptions 更語意化
+type PoolConfig struct {
+	MaxIdleConns        int           // 全局 idle 連線上限（跨 host）
+	MaxIdleConnsPerHost int           // 單 host idle 連線上限
+	MaxConnsPerHost     int           // 單 host 總連線上限
+	IdleConnTimeout     time.Duration // idle 連線存活時間
+}
+
+// 預設連線池組合，依使用場景選用
+var (
+	// PoolDefault 通用場景（4-8 worker 共享 Client）
+	PoolDefault = PoolConfig{MaxIdleConns: 100, MaxIdleConnsPerHost: 32, MaxConnsPerHost: 64, IdleConnTimeout: 90 * time.Second}
+
+	// PoolSmall 每 task 獨立 Client 的高並發場景（如 500+ 抢购 task）
+	// 單 Client 池小，避免整體 fd/內存暴增
+	PoolSmall = PoolConfig{MaxIdleConns: 16, MaxIdleConnsPerHost: 4, MaxConnsPerHost: 16, IdleConnTimeout: 60 * time.Second}
+
+	// PoolLarge 共享 Client 且超高並發
+	PoolLarge = PoolConfig{MaxIdleConns: 500, MaxIdleConnsPerHost: 128, MaxConnsPerHost: 256, IdleConnTimeout: 120 * time.Second}
+)
+
+func (p PoolConfig) toTransport() *tls_client.TransportOptions {
+	idle := p.IdleConnTimeout
+	return &tls_client.TransportOptions{
+		MaxIdleConns:        p.MaxIdleConns,
+		MaxIdleConnsPerHost: p.MaxIdleConnsPerHost,
+		MaxConnsPerHost:     p.MaxConnsPerHost,
+		IdleConnTimeout:     &idle,
+	}
+}
+
 func NewClient(userAgent string, cp ...*CertPinning) *Client {
-	return newClient(userAgent, defaultWindowSize, defaultTimeout, cp...)
+	return newClient(userAgent, defaultWindowSize, defaultTimeout, PoolDefault, cp...)
+}
+
+// NewClientWithPool 自定義連線池容量建立 Client，適用於高並發或共享場景
+//
+//	小池（500+ task 各持一個 Client）: requests.NewClientWithPool(ua, requests.PoolSmall)
+//	自訂: requests.NewClientWithPool(ua, requests.PoolConfig{MaxIdleConnsPerHost: 8, ...})
+func NewClientWithPool(userAgent string, pool PoolConfig, cp ...*CertPinning) *Client {
+	return newClient(userAgent, defaultWindowSize, defaultTimeout, pool, cp...)
 }
 
 func TimeoutClient(timeout int) *Client {
-	return newClient(defaultUserAgent, defaultWindowSize, timeout)
+	return newClient(defaultUserAgent, defaultWindowSize, timeout, PoolDefault)
 }
 
 func DefaultClient() *Client {
@@ -194,19 +238,24 @@ func DefaultClient() *Client {
 
 func (c *Client) NewRequest() *Request {
 	cReq := NewRequest(c.tlsClient)
-	cReq.SetHeader("Accept", "*/*")
-	cReq.SetHeader("Accept-Language", "en-US,en;q=0.9,zh-TW;q=0.8,zh;q=0.7")
-	cReq.SetHeader("Accept-Encoding", "gzip, deflate, br")
-	cReq.SetHeader("Cache-Control", "no-cache")
-	cReq.SetHeader("Pragma", "no-cache")
-	cReq.SetHeader("User-Agent", c.UserAgent)
+	cReq.header = maps.Clone(c.headerTemplate)
 	if len(c.ExtraHeaders) > 0 {
-		for k, v := range c.ExtraHeaders {
-			cReq.SetHeader(k, v)
-		}
+		maps.Copy(cReq.header, c.ExtraHeaders)
 	}
 	cReq.SetHeaderOrder(c.HeaderOrder)
 	return cReq
+}
+
+// buildHeaderTemplate 在 Client 構造時預組裝通用請求頭，避免每次 NewRequest 重複賦值
+func (c *Client) buildHeaderTemplate() {
+	c.headerTemplate = map[string]string{
+		"Accept":          "*/*",
+		"Accept-Language": "en-US,en;q=0.9,zh-TW;q=0.8,zh;q=0.7",
+		"Accept-Encoding": "gzip, deflate, br",
+		"Cache-Control":   "no-cache",
+		"Pragma":          "no-cache",
+		"User-Agent":      c.UserAgent,
+	}
 }
 
 func (c *Client) SetKeepAlive(b bool) {
@@ -295,7 +344,7 @@ func (c *Client) GetIPLocation() (bool, string) {
 	return true, b
 }
 
-func newClient(userAgent string, windowSize [2]int, timeout int, cp ...*CertPinning) *Client {
+func newClient(userAgent string, windowSize [2]int, timeout int, pool PoolConfig, cp ...*CertPinning) *Client {
 	clientProfile := getClientProfile(userAgent)
 	cookieJar := tls_client.NewCookieJar()
 	connectHeader := http.Header{"User-Agent": {userAgent}}
@@ -306,6 +355,7 @@ func newClient(userAgent string, windowSize [2]int, timeout int, cp ...*CertPinn
 		tls_client.WithNotFollowRedirects(),
 		tls_client.WithInsecureSkipVerify(),
 		tls_client.WithConnectHeaders(connectHeader),
+		tls_client.WithTransportOptions(pool.toTransport()),
 	}
 	// Chrome 使用 extension 隨機排列（與真實 Chrome SSL_set_permute_extensions 一致）
 	// Safari/Firefox 不做 extension 隨機排列，順序固定
@@ -318,12 +368,14 @@ func newClient(userAgent string, windowSize [2]int, timeout int, cp ...*CertPinn
 		)
 	}
 	tlsClient, _ := tls_client.NewHttpClient(tls_client.NewNoopLogger(), options...)
-	return &Client{
+	c := &Client{
 		tlsClient:   tlsClient,
 		HeaderOrder: defaultHeaderOrder,
 		UserAgent:   userAgent,
 		WindowSize:  windowSize,
 	}
+	c.buildHeaderTemplate()
+	return c
 }
 
 func getClientProfile(userAgent string) profiles.ClientProfile {

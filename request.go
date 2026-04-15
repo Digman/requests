@@ -250,8 +250,19 @@ func (r *Request) Send(a ...any) *Request {
 		r.request.Header[http.HeaderOrderKey] = r.headerOrder
 	}
 
-	for _, v := range *r.cookies {
-		r.request.AddCookie(v)
+	// 一次性拼接 Cookie，避免 AddCookie 逐次 Get/Set 造成 O(n²) 字串重建
+	if n := len(*r.cookies); n > 0 {
+		var sb strings.Builder
+		sb.Grow(n * 32)
+		for i, v := range *r.cookies {
+			if i > 0 {
+				sb.WriteString("; ")
+			}
+			sb.WriteString(v.Name)
+			sb.WriteByte('=')
+			sb.WriteString(v.Value)
+		}
+		r.request.Header.Set("Cookie", sb.String())
 	}
 
 	r.response, err = r.client.Do(r.request)
