@@ -10,6 +10,7 @@ import (
 	JSON "github.com/tidwall/gjson"
 
 	"io"
+	"maps"
 	"mime/multipart"
 	"net/url"
 	"os"
@@ -28,7 +29,7 @@ type Request struct {
 	header      map[string]string
 	headerOrder []string
 	cookies     *[]*http.Cookie
-	dataType    interface{}
+	dataType    any
 	data        url.Values
 	jsonData    string
 	fileData    map[bool]map[string]string
@@ -91,9 +92,7 @@ func (r *Request) SetHeader(name, value string) *Request {
 }
 
 func (r *Request) SetHeaders(values map[string]string) *Request {
-	for k, v := range values {
-		r.header[k] = v
-	}
+	maps.Copy(r.header, values)
 	return r
 }
 
@@ -156,28 +155,30 @@ func (r *Request) log(t string) {
 		fmt.Printf("[Request Debug]\n")
 		fmt.Printf("-------------------------------------------------------------------\n")
 		fmt.Printf("Request: %s %s\nHeader: %v\nCookies: %v\n", r.method, r.url, r.request.Header, r.request.Cookies())
-		if t == "url" {
+		switch t {
+		case "url":
 			if r.method == "GET" {
 				fmt.Printf("Query: %v\n", r.request.URL.RawQuery)
 			} else {
 				fmt.Printf("Body: %v\n", r.data)
 			}
-		} else if t == "json" {
+		case "json":
 			fmt.Printf("Body: %v\n", r.jsonData)
-		} else {
+		default:
 			fmt.Printf("Body: %v\n", r.fileData)
 		}
 		fmt.Printf("-------------------------------------------------------------------\n")
 	}
 }
 
-func (r *Request) Send(a ...interface{}) *Request {
+func (r *Request) Send(a ...any) *Request {
 	var err error
 	if len(a) > 0 {
 		r.dataType = a[0]
 	}
 	r.err = nil
-	if r.dataType == nil || r.dataType == "url" {
+	switch r.dataType {
+	case nil, "url":
 		var body io.Reader
 		if r.method != "GET" {
 			body = strings.NewReader(r.data.Encode())
@@ -199,7 +200,7 @@ func (r *Request) Send(a ...interface{}) *Request {
 		} else if r.method == "GET" && len(r.data) > 0 {
 			r.request.URL.RawQuery = r.data.Encode()
 		}
-	} else if r.dataType == "json" {
+	case "json":
 		r.request, err = http.NewRequest(r.method, r.url, strings.NewReader(r.jsonData))
 		defer r.log("json")
 		if err != nil {
@@ -207,7 +208,7 @@ func (r *Request) Send(a ...interface{}) *Request {
 			return r
 		}
 		r.request.Header.Set("Content-Type", "application/json; charset=UTF-8")
-	} else if r.dataType == "file" {
+	case "file":
 		bodyBuf := &bytes.Buffer{}
 		bodyWriter := multipart.NewWriter(bodyBuf)
 		for h, m := range r.fileData {
@@ -237,7 +238,7 @@ func (r *Request) Send(a ...interface{}) *Request {
 		}
 
 		r.request.Header.Set("Content-Type", contentType)
-	} else {
+	default:
 		r.err = errors.New("unsupported data type")
 		return r
 	}
@@ -266,38 +267,14 @@ func (r *Request) Close() {
 		return
 	}
 	_ = r.response.Body.Close()
-	r.response.Close = true
 }
 
 func (r *Request) End() (*http.Response, string, error) {
-	defer r.Close()
-
-	if r.err != nil {
-		return nil, "", r.err
-	}
-
-	if r.response == nil {
-		return nil, "", errors.New("response empty")
-	}
-
-	var (
-		bodyByte []byte
-		err      error
-	)
-
-	body := r.response.Body
-
-	if r.response.ProtoMajor < 2 {
-		body = http.DecompressBody(r.response)
-	}
-
-	bodyByte, err = io.ReadAll(body)
+	response, bodyByte, err := r.EndByte()
 	if err != nil {
 		return nil, "", err
 	}
-
-	return r.response, string(bodyByte), nil
-
+	return response, string(bodyByte), nil
 }
 
 func (r *Request) EndJson() (*http.Response, JSON.Result, error) {
@@ -317,8 +294,16 @@ func (r *Request) EndResponse() (*http.Response, error) {
 		return nil, r.err
 	}
 
-	// fix keep-alive
-	_, _ = io.ReadAll(r.response.Body)
+	if r.response == nil {
+		return nil, errors.New("response empty")
+	}
+
+	// HTTP/2 多路復用：Body.Close() 即可釋放串流，無需 drain
+	// HTTP/1.1 keep-alive：需讀完 body 才能將連線歸還連線池，限額避免超大 body 拖慢
+	if r.response.ProtoMajor < 2 {
+		const maxDrain = 64 << 10
+		_, _ = io.CopyN(io.Discard, r.response.Body, maxDrain)
+	}
 
 	return r.response, nil
 }
@@ -327,27 +312,27 @@ func (r *Request) EndByte() (*http.Response, []byte, error) {
 	defer r.Close()
 
 	if r.err != nil {
-		return nil, []byte(""), r.err
+		return nil, nil, r.err
 	}
 
-	var (
-		bodyByte []byte
-		err      error
-	)
+	if r.response == nil {
+		return nil, nil, errors.New("response empty")
+	}
 
 	body := r.response.Body
-
 	if r.response.ProtoMajor < 2 {
 		body = http.DecompressBody(r.response)
 	}
 
-	bodyByte, err = io.ReadAll(body)
-	if err != nil {
-		return nil, []byte(""), err
+	buf := bytes.Buffer{}
+	if n := r.response.ContentLength; n > 0 {
+		buf.Grow(int(n))
+	}
+	if _, err := io.Copy(&buf, body); err != nil {
+		return nil, nil, err
 	}
 
-	return r.response, bodyByte, nil
-
+	return r.response, buf.Bytes(), nil
 }
 
 func (r *Request) EndFile(savePath, saveFileName string) (*http.Response, error) {
@@ -355,6 +340,10 @@ func (r *Request) EndFile(savePath, saveFileName string) (*http.Response, error)
 
 	if r.err != nil {
 		return nil, r.err
+	}
+
+	if r.response == nil {
+		return nil, errors.New("response empty")
 	}
 
 	if r.response.StatusCode != http.StatusOK {
@@ -368,10 +357,14 @@ func (r *Request) EndFile(savePath, saveFileName string) (*http.Response, error)
 		}
 	}
 
-	bodyByte, _ := io.ReadAll(r.response.Body)
-	err := os.WriteFile(savePath+saveFileName, bodyByte, 0777)
+	f, err := os.OpenFile(savePath+saveFileName, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
-		return nil, errors.New(err.Error())
+		return nil, err
+	}
+	defer f.Close()
+
+	if _, err = io.Copy(f, r.response.Body); err != nil {
+		return nil, err
 	}
 
 	return r.response, nil
