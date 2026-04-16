@@ -33,14 +33,16 @@ type CertPinning struct {
 }
 
 type profileList struct {
-	term     string
+	// terms[0] 同時是 profile map key 的前綴；後續元素為等價別名，UA 含任一即命中，比對時替換 key 前綴
+	terms    []string
 	defaults profiles.ClientProfile
 	profiles map[string]profiles.ClientProfile
 }
 
 var clientProfiles = []profileList{
 	{
-		term:     "Chrome",
+		// CriOS = iOS 上的 Chrome，TLS 指紋與桌面 Chrome 同步
+		terms:    []string{"Chrome", "CriOS"},
 		defaults: profiles.DefaultClientProfile,
 		profiles: map[string]profiles.ClientProfile{
 			"Chrome/103": profiles.Chrome_103,
@@ -90,7 +92,7 @@ var clientProfiles = []profileList{
 		},
 	},
 	{
-		term:     "Firefox",
+		terms:    []string{"Firefox"},
 		defaults: profiles.Firefox_147,
 		profiles: map[string]profiles.ClientProfile{
 			"Firefox/102": profiles.Firefox_102,
@@ -131,7 +133,7 @@ var clientProfiles = []profileList{
 		},
 	},
 	{
-		term:     "Version",
+		terms:    []string{"Version"},
 		defaults: profiles.Safari_26,
 		profiles: map[string]profiles.ClientProfile{
 			"Version/15":     profiles.Safari_15_6_1,
@@ -381,15 +383,25 @@ func newClient(userAgent string, windowSize [2]int, timeout int, pool PoolConfig
 }
 
 func getClientProfile(userAgent string) profiles.ClientProfile {
-	for _, clientProfile := range clientProfiles {
-		if strings.Contains(userAgent, clientProfile.term) {
-			for k, v := range clientProfile.profiles {
-				if strings.Contains(userAgent, k) {
-					return v
-				}
+	for _, pl := range clientProfiles {
+		hit := ""
+		for _, t := range pl.terms {
+			if strings.Contains(userAgent, t) {
+				hit = t
+				break
 			}
-			return clientProfile.defaults
 		}
+		if hit == "" {
+			continue
+		}
+		canonical := pl.terms[0]
+		for k, v := range pl.profiles {
+			matchKey := strings.Replace(k, canonical, hit, 1)
+			if strings.Contains(userAgent, matchKey) {
+				return v
+			}
+		}
+		return pl.defaults
 	}
 	return profiles.DefaultClientProfile
 }
