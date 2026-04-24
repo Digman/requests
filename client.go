@@ -200,9 +200,9 @@ var (
 	// PoolDefault 通用場景（4-8 worker 共享 Client）
 	PoolDefault = PoolConfig{MaxIdleConns: 100, MaxIdleConnsPerHost: 32, MaxConnsPerHost: 64, IdleConnTimeout: 90 * time.Second}
 
-	// PoolSmall 每 task 獨立 Client 的高並發場景（如 500+ 抢购 task）
-	// 單 Client 池小，避免整體 fd/內存暴增
-	PoolSmall = PoolConfig{MaxIdleConns: 16, MaxIdleConnsPerHost: 4, MaxConnsPerHost: 16, IdleConnTimeout: 60 * time.Second}
+	// PoolSmall 每 Client 獨立、總 Client 數高的場景（如 500+ Clients 並存）
+	// 單 Client 池小，避免整體 fd/內存暴增；適用於單 Client 內串行或輕度並發的請求模式
+	PoolSmall = PoolConfig{MaxIdleConns: 16, MaxIdleConnsPerHost: 4, MaxConnsPerHost: 4, IdleConnTimeout: 90 * time.Second}
 
 	// PoolLarge 共享 Client 且超高並發
 	PoolLarge = PoolConfig{MaxIdleConns: 500, MaxIdleConnsPerHost: 128, MaxConnsPerHost: 256, IdleConnTimeout: 120 * time.Second}
@@ -224,7 +224,7 @@ func NewClient(userAgent string, cp ...*CertPinning) *Client {
 
 // NewClientWithPool 自定義連線池容量建立 Client，適用於高並發或共享場景
 //
-//	小池（500+ task 各持一個 Client）: requests.NewClientWithPool(ua, requests.PoolSmall)
+//	小池（每 Client 獨立，總 Client 數多）: requests.NewClientWithPool(ua, requests.PoolSmall)
 //	自訂: requests.NewClientWithPool(ua, requests.PoolConfig{MaxIdleConnsPerHost: 8, ...})
 func NewClientWithPool(userAgent string, pool PoolConfig, cp ...*CertPinning) *Client {
 	return newClient(userAgent, defaultWindowSize, defaultTimeout, pool, cp...)
