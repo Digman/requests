@@ -340,7 +340,7 @@ func (c *Client) GetFingerPrint() (bool, string) {
 }
 
 func (c *Client) GetIPLocation() (bool, string) {
-	_, b, e := c.NewRequest().Get("http://ip-api.com/json").Send().End()
+	_, b, e := c.NewRequest().Get("https://ipinfo.io/json").Send().End()
 	if e != nil {
 		return false, e.Error()
 	}
