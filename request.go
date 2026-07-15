@@ -2,6 +2,7 @@ package requests
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -21,6 +22,7 @@ import (
 )
 
 type Request struct {
+	ctx         context.Context
 	client      tls_client.HttpClient
 	request     *http.Request
 	response    *http.Response
@@ -41,6 +43,7 @@ type Request struct {
 
 func NewRequest(client tls_client.HttpClient) *Request {
 	return &Request{
+		ctx:      context.Background(),
 		client:   client,
 		method:   "GET",
 		header:   make(map[string]string),
@@ -48,6 +51,14 @@ func NewRequest(client tls_client.HttpClient) *Request {
 		data:     url.Values{},
 		fileData: make(map[bool]map[string]string),
 	}
+}
+
+func (r *Request) SetContext(ctx context.Context) *Request {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	r.ctx = ctx
+	return r
 }
 
 func (r *Request) Get(url string) *Request {
@@ -183,7 +194,7 @@ func (r *Request) Send(a ...any) *Request {
 		if r.method != "GET" {
 			body = strings.NewReader(r.data.Encode())
 		}
-		r.request, err = http.NewRequest(r.method, r.url, body)
+		r.request, err = http.NewRequestWithContext(r.ctx, r.method, r.url, body)
 
 		defer r.log("url")
 		if err != nil {
@@ -201,7 +212,7 @@ func (r *Request) Send(a ...any) *Request {
 			r.request.URL.RawQuery = r.data.Encode()
 		}
 	case "json":
-		r.request, err = http.NewRequest(r.method, r.url, strings.NewReader(r.jsonData))
+		r.request, err = http.NewRequestWithContext(r.ctx, r.method, r.url, strings.NewReader(r.jsonData))
 		defer r.log("json")
 		if err != nil {
 			r.err = err
@@ -230,7 +241,7 @@ func (r *Request) Send(a ...any) *Request {
 
 		contentType := bodyWriter.FormDataContentType()
 		_ = bodyWriter.Close()
-		r.request, err = http.NewRequest(r.method, r.url, io.NopCloser(bodyBuf))
+		r.request, err = http.NewRequestWithContext(r.ctx, r.method, r.url, io.NopCloser(bodyBuf))
 		defer r.log("file")
 		if err != nil {
 			r.err = err

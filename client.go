@@ -1,9 +1,11 @@
 package requests
 
 import (
+	"context"
 	"maps"
 	"net/url"
 	"strings"
+	"sync"
 	"time"
 
 	tls_client "github.com/Digman/tls-client"
@@ -13,6 +15,9 @@ import (
 
 type Client struct {
 	tlsClient tls_client.HttpClient
+	ctxMu     sync.RWMutex
+	ctx       context.Context
+	proxyMu   sync.RWMutex
 
 	ExtraHeaders map[string]string
 	HeaderOrder  []string
@@ -240,12 +245,27 @@ func DefaultClient() *Client {
 
 func (c *Client) NewRequest() *Request {
 	cReq := NewRequest(c.tlsClient)
+	c.ctxMu.RLock()
+	ctx := c.ctx
+	c.ctxMu.RUnlock()
+	cReq.SetContext(ctx)
 	cReq.header = maps.Clone(c.headerTemplate)
 	if len(c.ExtraHeaders) > 0 {
 		maps.Copy(cReq.header, c.ExtraHeaders)
 	}
 	cReq.SetHeaderOrder(c.HeaderOrder)
 	return cReq
+}
+
+// SetContext 設定後續 NewRequest 使用的 context，可與 NewRequest 並行呼叫。
+// 已建立的 Request 保留建立當下取得的 context。
+func (c *Client) SetContext(ctx context.Context) {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	c.ctxMu.Lock()
+	c.ctx = ctx
+	c.ctxMu.Unlock()
 }
 
 // buildHeaderTemplate 在 Client 構造時預組裝通用請求頭，避免每次 NewRequest 重複賦值
@@ -274,20 +294,28 @@ func (c *Client) SetKeepAlive(b bool) {
 }
 
 func (c *Client) SetProxy(proxyUrl string) error {
-	c.RawProxy = proxyUrl
-	c.ProxyUrl = nil
+	c.proxyMu.Lock()
+	defer c.proxyMu.Unlock()
+
+	rawProxy := proxyUrl
+	var parsedProxy *url.URL
 	var err error
 	if proxyUrl != "" {
 		if !isUrl(proxyUrl) {
 			proxyUrl = "http://" + proxyUrl
 		}
-		c.ProxyUrl, err = url.Parse(proxyUrl)
+		parsedProxy, err = url.Parse(proxyUrl)
 		if err != nil {
 			return err
 		}
 
 	}
-	return c.tlsClient.SetProxy(proxyUrl)
+	if err := c.tlsClient.SetProxy(proxyUrl); err != nil {
+		return err
+	}
+	c.RawProxy = rawProxy
+	c.ProxyUrl = parsedProxy
+	return nil
 }
 
 func (c *Client) SetAutoRedirect(b bool) {
@@ -376,6 +404,7 @@ func newClient(userAgent string, windowSize [2]int, timeout int, pool PoolConfig
 	tlsClient, _ := tls_client.NewHttpClient(tls_client.NewNoopLogger(), options...)
 	c := &Client{
 		tlsClient:   tlsClient,
+		ctx:         context.Background(),
 		HeaderOrder: defaultHeaderOrder,
 		UserAgent:   userAgent,
 		WindowSize:  windowSize,
