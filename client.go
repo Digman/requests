@@ -46,6 +46,14 @@ type profileList struct {
 
 var clientProfiles = []profileList{
 	{
+		// Brave UA 也包含 Chrome 标记，因此必须在 Chromium profile 列表前匹配。
+		terms:    []string{"Brave"},
+		defaults: profiles.Brave_146_PSK,
+		profiles: map[string]profiles.ClientProfile{
+			"Brave/146": profiles.Brave_146_PSK,
+		},
+	},
+	{
 		// CriOS = iOS 上的 Chrome，TLS 指紋與桌面 Chrome 同步
 		terms:    []string{"Chrome", "CriOS"},
 		defaults: profiles.DefaultClientProfile,
@@ -94,11 +102,17 @@ var clientProfiles = []profileList{
 			"Chrome/144": profiles.Chrome_144_PSK,
 			"Chrome/145": profiles.Chrome_145_PSK,
 			"Chrome/146": profiles.Chrome_146_PSK,
+			"Chrome/147": profiles.Chrome_146_PSK,
+			"Chrome/148": profiles.Chrome_146_PSK,
+			"Chrome/149": profiles.Chrome_146_PSK,
+			"Chrome/150": profiles.Chrome_150_PSK,
+			"Chrome/151": profiles.Chrome_150_PSK,
+			"Chrome/152": profiles.Chrome_152_PSK,
 		},
 	},
 	{
 		terms:    []string{"Firefox"},
-		defaults: profiles.Firefox_147,
+		defaults: profiles.Firefox_148,
 		profiles: map[string]profiles.ClientProfile{
 			"Firefox/102": profiles.Firefox_102,
 			"Firefox/104": profiles.Firefox_104,
@@ -135,6 +149,7 @@ var clientProfiles = []profileList{
 			"Firefox/145": profiles.Firefox_135,
 			"Firefox/146": profiles.Firefox_146_PSK,
 			"Firefox/147": profiles.Firefox_147,
+			"Firefox/148": profiles.Firefox_148,
 		},
 	},
 	{
@@ -152,9 +167,11 @@ var clientProfiles = []profileList{
 			"iPhone OS 17_":  profiles.Safari_IOS_17_0,
 			"iPhone OS 18_0": profiles.Safari_IOS_18_0,
 			"iPhone OS 18_":  profiles.Safari_IOS_26_0,
+			"iPhone OS 26_":  profiles.Safari_IOS_26_0,
 			"CPU OS 17_":     profiles.Safari_IOS_17_0,
 			"CPU OS 18_0":    profiles.Safari_IOS_18_0,
 			"CPU OS 18_":     profiles.Safari_IOS_26_0,
+			"CPU OS 26_":     profiles.Safari_IOS_26_0,
 		},
 	},
 }
@@ -184,7 +201,7 @@ var defaultHeaderOrder = []string{
 }
 
 // defaultUserAgent default useragent
-var defaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+var defaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36"
 
 // defaultWindowSize default window size
 var defaultWindowSize = [2]int{1440, 900}
@@ -391,9 +408,7 @@ func newClient(userAgent string, windowSize [2]int, timeout int, pool PoolConfig
 		tls_client.WithConnectHeaders(connectHeader),
 		tls_client.WithTransportOptions(pool.toTransport()),
 	}
-	// Chrome 使用 extension 隨機排列（與真實 Chrome SSL_set_permute_extensions 一致）
-	// Safari/Firefox 不做 extension 隨機排列，順序固定
-	if !strings.Contains(userAgent, "Version/") {
+	if shouldRandomizeTLSExtensionOrder(clientProfile) {
 		options = append(options, tls_client.WithRandomTLSExtensionOrder())
 	}
 	if len(cp) > 0 && cp[0] != nil {
@@ -425,16 +440,28 @@ func getClientProfile(userAgent string) profiles.ClientProfile {
 		if hit == "" {
 			continue
 		}
+
 		canonical := pl.terms[0]
+		var matched profiles.ClientProfile
+		longestMatch := ""
 		for k, v := range pl.profiles {
 			matchKey := strings.Replace(k, canonical, hit, 1)
-			if strings.Contains(userAgent, matchKey) {
-				return v
+			if strings.Contains(userAgent, matchKey) && len(matchKey) > len(longestMatch) {
+				matched = v
+				longestMatch = matchKey
 			}
+		}
+		if longestMatch != "" {
+			return matched
 		}
 		return pl.defaults
 	}
 	return profiles.DefaultClientProfile
+}
+
+func shouldRandomizeTLSExtensionOrder(profile profiles.ClientProfile) bool {
+	client := profile.GetClientHelloId().Client
+	return client == "Chrome" || client == "Brave"
 }
 
 func isUrl(path string) bool {

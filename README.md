@@ -4,7 +4,7 @@
 
 ## 特性
 
-- **TLS 指纹模拟** - 支持 Chrome (103-133)、Firefox (102-135)、Safari (15-18) 浏览器指纹
+- **TLS 指纹模拟** - 支持 Chrome (103-152)、Brave 146、Firefox (102-148)、Safari (15-26) 浏览器指纹
 - **代理支持** - 支持 HTTP、HTTPS 和 SOCKS5 代理
 - **Cookie 管理** - 完整的 Cookie jar 支持，支持基于域名的操作
 - **自定义 Headers** - 支持设置自定义请求头和请求头顺序
@@ -455,12 +455,16 @@ fmt.Println("文件上传成功，ID:", fileId)
 ### 使用自定义浏览器指纹
 
 ```go
-// Chrome 133
-userAgent := "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36"
+// Chrome 152
+userAgent := "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36"
 client := requests.NewClient(userAgent)
 
-// Firefox 135
-userAgent := "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:135.0) Gecko/20100101 Firefox/135.0"
+// Brave 146
+userAgent := "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36 Brave/146"
+client := requests.NewClient(userAgent)
+
+// Firefox 148
+userAgent := "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:148.0) Gecko/20100101 Firefox/148.0"
 client := requests.NewClient(userAgent)
 
 // Safari iOS 18
@@ -539,15 +543,18 @@ _, body, err := client.NewRequest().
 ## 支持的浏览器指纹
 
 ### Chrome
-103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 133
+103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152
+
+### Brave
+146
 
 ### Firefox
-102, 104, 105, 106, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 132, 133, 135
+102, 104, 105, 106, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 132, 133, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148
 
 ### Safari
-- macOS: Version 15, 16
-- iOS: 15.5, 15.6, 16.x, 17.x, 18.0, 18.x
-- iPad: 18.x
+- macOS: Version 15, 16, 17, 18, 26
+- iOS: 15.5, 15.6, 16.x, 17.x, 18.0, 18.x, 26.x
+- iPad: 15.6, 26.x
 
 ## 依赖
 
