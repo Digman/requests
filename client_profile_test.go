@@ -28,6 +28,11 @@ func TestGetClientProfileUsesLatestBrowserProfiles(t *testing.T) {
 			want:      profiles.Chrome_152_PSK.GetClientHelloStr(),
 		},
 		{
+			name:      "chrome 153",
+			userAgent: "Mozilla/5.0 Chrome/153.0.0.0 Safari/537.36",
+			want:      profiles.Chrome_153_PSK.GetClientHelloStr(),
+		},
+		{
 			name:      "chrome 149 falls back to 146",
 			userAgent: "Mozilla/5.0 Chrome/149.0.0.0 Safari/537.36",
 			want:      profiles.Chrome_146_PSK.GetClientHelloStr(),

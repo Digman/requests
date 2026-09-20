@@ -108,6 +108,7 @@ var clientProfiles = []profileList{
 			"Chrome/150": profiles.Chrome_150_PSK,
 			"Chrome/151": profiles.Chrome_150_PSK,
 			"Chrome/152": profiles.Chrome_152_PSK,
+			"Chrome/153": profiles.Chrome_153_PSK,
 		},
 	},
 	{
@@ -201,7 +202,7 @@ var defaultHeaderOrder = []string{
 }
 
 // defaultUserAgent default useragent
-var defaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36"
+var defaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36"
 
 // defaultWindowSize default window size
 var defaultWindowSize = [2]int{1440, 900}
