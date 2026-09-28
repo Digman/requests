@@ -17,6 +17,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	http "github.com/bogdanfinn/fhttp"
 )
@@ -39,6 +40,9 @@ type Request struct {
 	err         error
 	username    string
 	password    string
+	// Duration records the elapsed time of the most recent Send/End request.
+	Duration  time.Duration
+	startedAt time.Time
 }
 
 func NewRequest(client tls_client.HttpClient) *Request {
@@ -183,6 +187,9 @@ func (r *Request) log(t string) {
 }
 
 func (r *Request) Send(a ...any) *Request {
+	r.startedAt = time.Now()
+	r.Duration = 0
+
 	var err error
 	if len(a) > 0 {
 		r.dataType = a[0]
@@ -284,6 +291,12 @@ func (r *Request) Send(a ...any) *Request {
 	return r
 }
 
+func (r *Request) updateDuration() {
+	if !r.startedAt.IsZero() {
+		r.Duration = time.Since(r.startedAt)
+	}
+}
+
 func (r *Request) Close() {
 	if r.response == nil {
 		return
@@ -292,6 +305,8 @@ func (r *Request) Close() {
 }
 
 func (r *Request) End() (*http.Response, string, error) {
+	defer r.updateDuration()
+
 	response, bodyByte, err := r.EndByte()
 	if err != nil {
 		return nil, "", err
@@ -300,6 +315,8 @@ func (r *Request) End() (*http.Response, string, error) {
 }
 
 func (r *Request) EndJson() (*http.Response, JSON.Result, error) {
+	defer r.updateDuration()
+
 	response, body, err := r.EndByte()
 
 	if err != nil {
@@ -311,6 +328,7 @@ func (r *Request) EndJson() (*http.Response, JSON.Result, error) {
 
 func (r *Request) EndResponse() (*http.Response, error) {
 	defer r.Close()
+	defer r.updateDuration()
 
 	if r.err != nil {
 		return nil, r.err
@@ -332,6 +350,7 @@ func (r *Request) EndResponse() (*http.Response, error) {
 
 func (r *Request) EndByte() (*http.Response, []byte, error) {
 	defer r.Close()
+	defer r.updateDuration()
 
 	if r.err != nil {
 		return nil, nil, r.err
@@ -359,6 +378,7 @@ func (r *Request) EndByte() (*http.Response, []byte, error) {
 
 func (r *Request) EndFile(savePath, saveFileName string) (*http.Response, error) {
 	defer r.Close()
+	defer r.updateDuration()
 
 	if r.err != nil {
 		return nil, r.err

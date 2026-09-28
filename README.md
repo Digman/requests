@@ -346,6 +346,8 @@ client.NewRequest().
 |------|------|------|--------|
 | `Send(a ...interface{}) *Request` | 发送请求 | `a`: 可选的数据类型（"url"、"json"、"file"） | `*Request` |
 
+`Request.Duration` 保存最近一次请求从 `Send()` 开始到 `End()`、`EndJson()`、`EndResponse()` 或 `EndFile()` 完成的耗时；请求构造或发送失败时也会记录已消耗的时间。
+
 **注意:** 数据类型会根据您使用的 Set 方法自动检测。只有在文件上传时需要手动指定:
 ```go
 // 自动检测为 "json"
